@@ -1,4 +1,4 @@
-OPC DA client library
+OPC DA client toolkit
 ===========================
 
-OPC DA client library for .NET Framework applications
+OPC DA client toolkit for .NET Framework applications
