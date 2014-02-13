@@ -1,5 +1,5 @@
 ﻿
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
 	enum EnumScope
 	{

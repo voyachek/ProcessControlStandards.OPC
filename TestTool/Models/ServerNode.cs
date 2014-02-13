@@ -4,14 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
 
-using ProcessControlStandarts.OPC.Core;
-using ProcessControlStandarts.OPC.DataAccessClient;
-using ProcessControlStandarts.OPC.TestTool.Commands;
+using ProcessControlStandards.OPC.Core;
+using ProcessControlStandards.OPC.DataAccessClient;
+using ProcessControlStandards.OPC.TestTool.Commands;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Models
+namespace ProcessControlStandards.OPC.TestTool.Models
 {
 	public class ServerNode : Node
 	{
@@ -25,7 +27,7 @@ namespace ProcessControlStandarts.OPC.TestTool.Models
 			Icon = "/Images/ServerOff.png";
 		}
 
-		public override IList<Command> Commands
+        public override IList<ICommand> Commands
 		{
 			get { return CommandList; }
 			protected set { }
@@ -75,6 +77,43 @@ namespace ProcessControlStandarts.OPC.TestTool.Models
 					CommandList.ForEach(command => command.RiseCanExecuteChanged());
 				}
 			});
+
+		    serverThread.Post(new WorkerThread.Task
+		    {
+                Do = (task, args) =>
+                {
+                    var ip = server.GetItemProperties();
+
+                    var a = server.GetAddressSpaceBrowser();
+                    var @enum = a.GetItemIds(BrowseType.Flat, string.Empty, 0, 0).ToList();
+                    var iid = a.GetItemId(@enum[5]);
+
+                    var ipi = ip.QueryAvailableProperties(@enum[5]);
+                    var ipv = ip.GetItemProperties(@enum[5], new[] { ipi[0].Id, ipi[2].Id });
+
+                    var g = server.AddGroup(1, "test", true, 1000, 0);
+                    var res = g.AddItems(new[]
+                    {
+                        new Item
+                        {
+                            Active = true,
+                            ClientId = 1,
+                            ItemId = iid,
+                            RequestedDataType = (VarEnum)Convert.ToInt32(ipv[0].Value)
+                        },
+                        new Item
+                        {
+                            Active = true,
+                            ClientId = 1,
+                            ItemId = iid,
+                            RequestedDataType = (VarEnum)Convert.ToInt32(ipv[0].Value)
+                        }
+                    });
+
+                    var val = g.SyncReadItems(DataSource.Device, new[] { res[0].ServerId, res[1].ServerId });
+                    g.Dispose();
+                },
+		    });
 		}
 
 		public void Disconnect()
@@ -128,6 +167,24 @@ namespace ProcessControlStandarts.OPC.TestTool.Models
 			return true;
 		}
 
+        public bool GetDAGroupPropertiesAsync(DAGroupNode groupNode, Action<WorkerThread.Task, RunWorkerCompletedEventArgs> completed)
+        {
+            if (serverThread == null)
+                return false;
+
+            serverThread.Post(new WorkerThread.Task
+            {
+                Do = (task, args) =>
+                {
+                    args.Result = groupNode.Group.GetProperties();
+                },
+
+                Completed = completed,
+            });
+
+            return true;
+        }
+
 		public override void Dispose()
 		{
 			base.Dispose();
@@ -139,9 +196,10 @@ namespace ProcessControlStandarts.OPC.TestTool.Models
 
 		private WorkerThread serverThread;
 
-		private static readonly List<Command> CommandList = new List<Command>
+        private static readonly List<ICommand> CommandList = new List<ICommand>
 		{
 			new ConnectServerCommand(),
+            new AddDAGroupCommand(),
 			new DisconnectServerCommand(),
 			new ServerPropertiesCommand(),
 		};

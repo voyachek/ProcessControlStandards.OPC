@@ -5,11 +5,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-using ProcessControlStandarts.OPC.Core.Properties;
+using ProcessControlStandards.OPC.Core.Properties;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.Core
+namespace ProcessControlStandards.OPC.Core
 {
 	static class Utils
 	{
@@ -53,11 +53,11 @@ namespace ProcessControlStandarts.OPC.Core
 				array.Length * Guid.Empty.ToByteArray().Length);
 
 			var pos = 0;
-			for(var i = 0; i < array.Length; i++)
-				foreach(var @byte in array[i].ToByteArray())
-					Marshal.WriteByte(buffer, pos++, @byte);
+			foreach (var t in array)
+			    foreach(var @byte in t.ToByteArray())
+			        Marshal.WriteByte(buffer, pos++, @byte);
 
-			return buffer;
+		    return buffer;
 		}
 	}
 }

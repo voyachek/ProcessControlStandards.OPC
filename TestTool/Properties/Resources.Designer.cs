@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ProcessControlStandarts.OPC.TestTool.Properties {
+namespace ProcessControlStandards.OPC.TestTool.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ProcessControlStandarts.OPC.TestTool.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProcessControlStandarts.OPC.TestTool.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProcessControlStandards.OPC.TestTool.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,15 @@ namespace ProcessControlStandarts.OPC.TestTool.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add group.
+        /// </summary>
+        internal static string AddOPCDAGroup {
+            get {
+                return ResourceManager.GetString("AddOPCDAGroup", resourceCulture);
             }
         }
         

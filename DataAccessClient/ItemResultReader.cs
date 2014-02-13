@@ -7,13 +7,14 @@ using System.Security.Permissions;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
 	class ItemResultReader : IDisposable
 	{
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public ItemResultReader(ICollection<Item> items)
 		{
+		    size = items.Count;
             Items = Marshal.AllocCoTaskMem(ItemSize * items.Count);
             stringsToClear = new List<IntPtr>(items.Count * 2);
 
@@ -44,17 +45,23 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 				Marshal.WriteInt32(Items, position, 0);
 				position += sizeof(int);
 
+                if(IntPtr.Size == 8)
+                    position += sizeof(int);
+
 				// IntPtr pBlob;
 				Marshal.WriteIntPtr(Items, position, IntPtr.Zero);
 				position += IntPtr.Size;
 
 				// ushort vtRequestedDataType;
-				Marshal.WriteInt16(Items, position, (short)item.Type);
+                Marshal.WriteInt16(Items, position, (short)item.RequestedDataType);
 				position += sizeof(short);
 
 				// ushort wReserved;
 				Marshal.WriteInt16(Items, position, 0);
 				position += sizeof(short);
+
+                if (IntPtr.Size == 8)
+                    position += sizeof(int);
             }
 		}
 
@@ -65,14 +72,14 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 
 		public IntPtr Items { get; private set; }
 
-		[SecurityPermission(SecurityAction.LinkDemand)] 
-        public ItemResult[] Read(IntPtr dataPtr, int[] errors)
+		[SecurityPermission(SecurityAction.LinkDemand)]
+        public ItemResult[] Read(IntPtr dataPtr, IntPtr errorsPtr)
         {
 	        try
 	        {
 				var position = 0;
-				var result = new ItemResult[errors.Length];
-				for (var i = 0; i < errors.Length; i++)
+                var result = new ItemResult[size];
+                for (var i = 0; i < size; i++)
 				{
 					// ReSharper disable UseObjectOrCollectionInitializer
 					result[i] = new ItemResult();
@@ -83,7 +90,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 					position += sizeof(int);
 
 					// ushort vtCanonicalDataType;
-					result[i].CanonicalDataType = Marshal.ReadInt16(dataPtr, position);
+					result[i].CanonicalDataType = (VarEnum)Marshal.ReadInt16(dataPtr, position);
 					position += sizeof(short);
 
 					// ushort wReserved;
@@ -94,15 +101,22 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 					position += sizeof(int);
 
 					// uint dwBlobSize;
+				    var blobSize = Marshal.ReadInt32(dataPtr, position);
 					position += sizeof(int);
 
 					// IntPtr pBlob;
 					var blob = Marshal.ReadIntPtr(dataPtr, position);
 					position += IntPtr.Size;
-					if(blob != IntPtr.Zero)
-						Marshal.FreeCoTaskMem(blob);
+				    if (blob != IntPtr.Zero)
+				    {
+                        result[i].Blob = new byte[blobSize];
+                        for (var blobByteIndex = 0; blobByteIndex < blobSize; blobByteIndex++)
+                            result[i].Blob[blobByteIndex] = Marshal.ReadByte(blob, blobByteIndex);
 
-					result[i].Error = errors[i];
+						Marshal.FreeCoTaskMem(blob);
+				    }
+
+                    result[i].Error = Marshal.ReadInt32(errorsPtr, i * sizeof(int));
 				}
 
 				return result;
@@ -110,8 +124,25 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 	        finally
 	        {
 				Marshal.FreeCoTaskMem(dataPtr);
+                Marshal.FreeCoTaskMem(errorsPtr);
 	        }
         }
+
+	    [SecurityPermission(SecurityAction.LinkDemand)]
+	    public static int[] Read(int size, IntPtr dataPtr)
+	    {
+	        try
+	        {
+                var result = new int[size];
+	            for (var i = 0; i < size; i++)
+                    result[i] = Marshal.ReadInt32(dataPtr, i * sizeof(int));
+	            return result;
+	        }
+            finally
+            {
+                Marshal.FreeCoTaskMem(dataPtr);
+            }
+	    }
 
 		public void Dispose()
 		{
@@ -132,7 +163,9 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
             stringsToClear = null;
 		}
 
-		private List<IntPtr> stringsToClear;
+	    private readonly int size;
+
+        private List<IntPtr> stringsToClear;
 
 		private static readonly int ItemSize = 
 			IntPtr.Size + 
@@ -140,8 +173,10 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			sizeof(int) + 
 			sizeof(int) + 
 			sizeof(int) + 
+            IntPtr.Size == 8 ? sizeof(int) : 0 +
 			IntPtr.Size + 
 			sizeof(short) + 
-			sizeof(short);
+			sizeof(short) +
+            IntPtr.Size == 8 ? sizeof(int) : 0;
 	}
 }

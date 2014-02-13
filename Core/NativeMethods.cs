@@ -8,13 +8,13 @@ using System.Security.Permissions;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.Core
+namespace ProcessControlStandards.OPC.Core
 {
 	[SuppressUnmanagedCodeSecurity]
 	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
 	static class NativeMethods
 	{
-		public const int VariantSize = 0x10;
+		public static readonly int VariantSize = IntPtr.Size == 4 ? 0x10 : 0x18;
 
 		[SecurityCritical]
 		[SuppressUnmanagedCodeSecurity]

@@ -5,18 +5,19 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 
-using ProcessControlStandarts.OPC.Core;
-using ProcessControlStandarts.OPC.DataAccessClient;
-using ProcessControlStandarts.OPC.TestTool.Models;
-using ProcessControlStandarts.OPC.TestTool.Properties;
+using ProcessControlStandards.OPC.Core;
+using ProcessControlStandards.OPC.DataAccessClient;
+using ProcessControlStandards.OPC.TestTool.Models;
+using ProcessControlStandards.OPC.TestTool.Properties;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Commands
+namespace ProcessControlStandards.OPC.TestTool.Commands
 {
-	public class RefreshServersCommand : Command
+    public class RefreshServersCommand : Command<LocalHostNode>
 	{
-		public RefreshServersCommand() : base(Resources.RefreshCommand)
+		public RefreshServersCommand() 
+            : base(Resources.RefreshCommand)
 		{
 			worker.WorkerReportsProgress = true;
 			worker.WorkerSupportsCancellation = true;
@@ -24,15 +25,13 @@ namespace ProcessControlStandarts.OPC.TestTool.Commands
 			worker.RunWorkerCompleted += ServersRefreshWorkerCompleted;
 		}
 
-		public override void Execute(object parameter)
+        protected override void Execute(LocalHostNode node)
 		{
-			var node = (LocalHostNode) parameter;
-
 			node.Owner.Context.IsBusy = true;
 			worker.RunWorkerAsync(node);
 		}
 
-		public override bool CanExecute(object parameter)
+        protected override bool CanExecute(LocalHostNode node)
 		{
 			return !worker.IsBusy;
 		}

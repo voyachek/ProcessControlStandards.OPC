@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
     [Guid("39c13a71-011e-11d0-9675-0020afd8adb3"), ComImport, InterfaceType((short)1)]
     interface IOPCAsyncIO2
@@ -17,7 +17,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
             [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] int[] serverIds,
             [In] int transactionId,
             [Out] out int cancelId,
-            [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] out int[] errors);
+            [Out] out IntPtr errors);
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
         void Write(
@@ -26,7 +26,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
             [In] IntPtr values,
             [In] int transactionId,
             [Out] out int cancelId,
-            [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] out int[] errors);
+            [Out] out IntPtr errors);
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
         void Refresh2(

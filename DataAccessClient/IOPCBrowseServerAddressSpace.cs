@@ -3,11 +3,11 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-using ProcessControlStandarts.OPC.Core;
+using ProcessControlStandards.OPC.Core;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
 	[Guid("39C13A4F-011E-11D0-9675-0020AFD8ADB3"), ComImport, InterfaceType((short)1)]
 	interface IOPCBrowseServerAddressSpace
@@ -25,8 +25,8 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			[In] BrowseType browseFilterType, 
 			[In, MarshalAs(UnmanagedType.LPWStr)] string filterCriteria, 
 			[In] short vtDataTypeFilter, 
-			[In] int dwAccessRightsFilter, 
-			[Out,  MarshalAs(UnmanagedType.Interface)] out IEnumString ppIEnumString);
+			[In] int dwAccessRightsFilter,
+            [Out, MarshalAs(UnmanagedType.Interface)] out IEnumString ppIEnumString);
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
         void GetItemID(

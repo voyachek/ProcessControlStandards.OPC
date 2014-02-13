@@ -5,7 +5,7 @@ using System.Windows.Controls;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Commands
+namespace ProcessControlStandards.OPC.TestTool.Commands
 {
 	public static class BoundCommand
 	{
@@ -28,9 +28,9 @@ namespace ProcessControlStandarts.OPC.TestTool.Commands
 				return;
 			
 			item.CommandParameter = e.NewValue;
-			var cmd = item.Command as Command;
-			if (cmd != null)
-				cmd.RiseCanExecuteChanged();
+			var command = item.Command as ICommand;
+			if (command != null)
+				command.RiseCanExecuteChanged();
 		}
 	}
 }

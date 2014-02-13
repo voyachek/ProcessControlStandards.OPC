@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ProcessControlStandards.OPCDA</id>
+    <version>1.0.0</version>
+    <title>OPC DA client</title>
+    <authors>Vlad Voyachek</authors>
+    <owners>Vlad Voyachek</owners>
+    <description>
+      OPC DA client library for .NET Framework applications
+    </description>
+    <releaseNotes></releaseNotes>
+    <summary></summary>
+    <language>en-US</language>
+    <projectUrl>https://github.com/voyachek/ProcessControlStandards.OPC</projectUrl>
+    <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+    <copyright>Copyright  2014</copyright>
+    <dependencies></dependencies>
+    <references></references>
+    <tags>OPC DA OPCDA DataAccess</tags>
+  </metadata>
+  <files>
+    <file src="..\DataAccessClient\bin\Release\ProcessControlStandards.OPC.Core.dll" target="lib\net35\ProcessControlStandards.OPC.Core.dll" />
+    <file src="..\DataAccessClient\bin\Release\ProcessControlStandards.OPC.Core.pdb" target="lib\net35\ProcessControlStandards.OPC.Core.pdb" />
+    <file src="..\DataAccessClient\bin\Release\ProcessControlStandards.OPC.Core.xml" target="lib\net35\ProcessControlStandards.OPC.Core.XML" />
+    <file src="..\DataAccessClient\bin\Release\ProcessControlStandards.OPC.Core.dll" target="lib\net35\ProcessControlStandards.OPC.DataAccessClient.dll" />
+    <file src="..\DataAccessClient\bin\Release\ProcessControlStandards.OPC.Core.pdb" target="lib\net35\ProcessControlStandards.OPC.DataAccessClient.pdb" />
+    <file src="..\DataAccessClient\bin\Release\ProcessControlStandards.OPC.Core.xml" target="lib\net35\ProcessControlStandards.OPC.DataAccessClient.XML" />
+  </files>
+</package>

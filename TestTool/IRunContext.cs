@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace ProcessControlStandarts.OPC.TestTool
+namespace ProcessControlStandards.OPC.TestTool
 {
 	public interface IRunContext
 	{

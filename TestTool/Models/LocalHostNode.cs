@@ -2,11 +2,11 @@
 
 using System.Collections.Generic;
 
-using ProcessControlStandarts.OPC.TestTool.Commands;
+using ProcessControlStandards.OPC.TestTool.Commands;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Models
+namespace ProcessControlStandards.OPC.TestTool.Models
 {
 	public class LocalHostNode : Node
 	{
@@ -20,13 +20,13 @@ namespace ProcessControlStandarts.OPC.TestTool.Models
 
 		public ServersTree Owner { get; private set; }
 
-		public override IList<Command> Commands
+		public override IList<ICommand> Commands
 		{
 			get { return CommandList; }
 			protected set { }
 		}
 
-		private static readonly List<Command> CommandList = new List<Command>
+        private static readonly List<ICommand> CommandList = new List<ICommand>
 		{
 			new RefreshServersCommand()
 		};

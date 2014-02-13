@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ProcessControlStandarts.OPC.DataAccessClient.Properties {
+namespace ProcessControlStandards.OPC.DataAccessClient.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProcessControlStandarts.OPC.DataAccessClient.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProcessControlStandards.OPC.DataAccessClient.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
 	[Guid("39C13A50-011E-11D0-9675-0020AFD8ADB3"), ComImport, InterfaceType((short)1)]
 	interface IOPCGroupStateMgt

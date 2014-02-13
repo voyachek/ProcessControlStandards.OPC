@@ -120,7 +120,4 @@
   <data name="ErrorArgumentNullOrEmpty" xml:space="preserve">
     <value>Argument must be not null or empty</value>
   </data>
-  <data name="ErrorRetrieveServerName" xml:space="preserve">
-    <value>Error retreive server name {0}</value>
-  </data>
 </root>

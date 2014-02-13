@@ -5,9 +5,9 @@ using System.Windows.Input;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Commands
+namespace ProcessControlStandards.OPC.TestTool.Commands
 {
-	public class Command : ICommand
+	public class Command<T> : ICommand
 	{
 		public Command(string name)
 		{
@@ -18,13 +18,14 @@ namespace ProcessControlStandarts.OPC.TestTool.Commands
 
 		public string Name { get; private set; }
 
-		public virtual void Execute(object parameter)
+		public void Execute(object parameter)
 		{
+            Execute((T)parameter);
 		}
 
-		public virtual bool CanExecute(object parameter)
+		public bool CanExecute(object parameter)
 		{
-			return true;
+            return CanExecute((T)parameter);
 		}
 
 		public event EventHandler CanExecuteChanged;
@@ -37,5 +38,14 @@ namespace ProcessControlStandarts.OPC.TestTool.Commands
 			if (handler != null)
 				handler(this, EventArgs.Empty);
 		}
+
+        protected virtual void Execute(T parameter)
+        {
+        }
+
+        protected virtual bool CanExecute(T parameter)
+        {
+            return true;
+        }
 	}
 }

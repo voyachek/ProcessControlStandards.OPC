@@ -3,29 +3,14 @@
 using System;
 using System.ComponentModel;
 
-using ProcessControlStandarts.OPC.DataAccessClient;
+using ProcessControlStandards.OPC.DataAccessClient;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Models
+namespace ProcessControlStandards.OPC.TestTool.Models
 {
 	public class ServerProperties : INotifyPropertyChanged
 	{
-		/*
-		public ServerProperties(DataAccessClient.ServerProperties properties)
-		{
-			StartTime = properties.StartTime;
-			CurrentTime = properties.CurrentTime;
-			LastUpdateTime = properties.LastUpdateTime;
-			ServerState = properties.ServerState;
-			Groups = properties.GroupCount;
-			Bandwidth = properties.Bandwidth;
-			Version = string.Format("{0}.{1}.{2}",
-				properties.MajorVersion, properties.MinorVersion, properties.BuildNumber);
-			VendorInfo = properties.VendorInfo;
-		}
-		 * */
-
 		[Category("Basic")]
 		public Guid Id { get; set; }
 

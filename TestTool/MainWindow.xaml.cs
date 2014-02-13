@@ -5,12 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 
-using ProcessControlStandarts.OPC.TestTool.Commands;
-using ProcessControlStandarts.OPC.TestTool.Models;
+using ProcessControlStandards.OPC.TestTool.Commands;
+using ProcessControlStandards.OPC.TestTool.Models;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool
+namespace ProcessControlStandards.OPC.TestTool
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml

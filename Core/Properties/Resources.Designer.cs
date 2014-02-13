@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ProcessControlStandarts.OPC.Core.Properties {
+namespace ProcessControlStandards.OPC.Core.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ProcessControlStandarts.OPC.Core.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProcessControlStandarts.OPC.Core.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProcessControlStandards.OPC.Core.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -66,15 +66,6 @@ namespace ProcessControlStandarts.OPC.Core.Properties {
         internal static string ErrorArgumentNullOrEmpty {
             get {
                 return ResourceManager.GetString("ErrorArgumentNullOrEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error retreive server name {0}.
-        /// </summary>
-        internal static string ErrorRetrieveServerName {
-            get {
-                return ResourceManager.GetString("ErrorRetrieveServerName", resourceCulture);
             }
         }
     }

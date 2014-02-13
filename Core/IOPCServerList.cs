@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.Core
+namespace ProcessControlStandards.OPC.Core
 {
 	[Guid("13486D50-4821-11D2-A494-3CB306C10000"), ComImport, InterfaceType((short)1)]
 	interface IOPCServerList

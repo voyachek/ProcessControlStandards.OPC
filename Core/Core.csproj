@@ -7,8 +7,8 @@
     <ProjectGuid>{8C6231CB-013C-471F-B454-06139FA359AE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProcessControlStandarts.OPC.Core</RootNamespace>
-    <AssemblyName>ProcessControlStandarts.OPC.Core</AssemblyName>
+    <RootNamespace>ProcessControlStandards.OPC.Core</RootNamespace>
+    <AssemblyName>ProcessControlStandards.OPC.Core</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -31,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <DocumentationFile>bin\Release\ProcessControlStandards.OPC.Core.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

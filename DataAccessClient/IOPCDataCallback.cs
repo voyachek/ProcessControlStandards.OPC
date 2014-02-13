@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
     [Guid("39c13a70-011e-11d0-9675-0020afd8adb3"), ComImport, InterfaceType((short)1)]
     interface IOPCDataCallback

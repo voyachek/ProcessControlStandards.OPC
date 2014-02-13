@@ -2,27 +2,31 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
-using ProcessControlStandarts.OPC.Core.Properties;
-
 #endregion
 
-namespace ProcessControlStandarts.OPC.Core
+namespace ProcessControlStandards.OPC.Core
 {
+    /// <summary>
+    /// Helps to retrieve information about installed OPC Servers.
+    /// </summary>
 	public class ServerBrowser : IDisposable
 	{
-		public ServerBrowser(TraceSource log = null) : this(string.Empty)
+        /// <summary>
+        /// Connects to local computer.
+        /// </summary>
+		public ServerBrowser() : this(string.Empty)
 		{
-			this.log = log;
 		}
 
-		public ServerBrowser(string host, TraceSource log = null)
+        /// <summary>
+        /// Connects to remote computer.
+        /// </summary>
+        /// <param name="host">Host name or IP address of remote computer.</param>
+		public ServerBrowser(string host)
 		{
-			this.log = log;
-
 			var serverType = string.IsNullOrEmpty(host) ? 
 				Type.GetTypeFromCLSID(OpcEnum, true) : 
 				Type.GetTypeFromCLSID(OpcEnum, host, true);
@@ -43,6 +47,11 @@ namespace ProcessControlStandarts.OPC.Core
 			Dispose(false);
 		}
 
+        /// <summary>
+        /// Returns an enumerator to allow to determine available OPC servers.
+        /// </summary>
+        /// <param name="categories">OPC Server categories (OPCDA/OPCHDA etc.)</param>
+        /// <returns>Enumerator to allow to determine available OPC servers.</returns>
 		public IEnumerable<ServerDescription> GetEnumerator(params Guid[] categories)
 		{
 			IEnumGUID enumerator = null;
@@ -67,32 +76,37 @@ namespace ProcessControlStandarts.OPC.Core
 
 				while(true)
 				{
-					var id = Guid.Empty;
-					var programId = string.Empty;
-					var name = string.Empty;
-					var verIndProgramId = string.Empty;
-
-					uint fetched = 0;
-					if(opcEnumerator != null)
-						opcEnumerator.Next(1, out id, out fetched);
-					else if (enumerator != null) 
-						enumerator.Next(1, out id, out fetched);
+                    var res = 0;
+                    uint fetched = 0;
+                    var ids = new Guid[1];
+                    if (opcEnumerator != null)
+                        res = opcEnumerator.Next((uint)ids.Length, ids, out fetched);
+					else if (enumerator != null)
+                        res = enumerator.Next(1, ids, out fetched);
+                    if (res > 1)
+                        Marshal.ThrowExceptionForHR(res);
 					if(fetched == 0)
 						break;
 
-					try 
+				    var id = ids[0];
+				    ServerDescription serverDescription;
+                    try 
 					{
-						if(serverList2 != null)
-							serverList2.GetClassDetails(ref id, out programId, out name, out verIndProgramId);
+					    string name;
+                        string programId;
+                        var versionIndependentProgramId = string.Empty;
+                        if (serverList2 != null)
+                            serverList2.GetClassDetails(ref id, out programId, out name, out versionIndependentProgramId);
 						else
 							serverList.GetClassDetails(ref id, out programId, out name);
+                        serverDescription = new ServerDescription(id, programId, versionIndependentProgramId, name);
 					}
 					catch(Exception e)
 					{
-						log.Warning(Resources.ErrorRetrieveServerName.FormatString(id), e);
+                        serverDescription = new ServerDescription(id, e);
 					}
-		
-					yield return new ServerDescription(id, programId, verIndProgramId, name);
+
+                    yield return serverDescription;
 				}
 			}
 			finally
@@ -104,6 +118,9 @@ namespace ProcessControlStandarts.OPC.Core
 			}
 		}
 
+        /// <summary>
+        /// Disconnects from OPC Server browser.
+        /// </summary>
 		[EnvironmentPermission(SecurityAction.Demand, Unrestricted=true)]
 		public void Dispose()
 		{
@@ -112,6 +129,10 @@ namespace ProcessControlStandarts.OPC.Core
 			GC.SuppressFinalize(this);
 		}
 
+        /// <summary>
+        /// Disconnects from OPC Server browser.
+        /// </summary>
+        /// <param name="dispose">true - call in Dispose.</param>
 		[EnvironmentPermission(SecurityAction.LinkDemand, Unrestricted=true)]
 		protected virtual void Dispose(bool dispose)
 		{
@@ -119,8 +140,6 @@ namespace ProcessControlStandarts.OPC.Core
 				Marshal.ReleaseComObject(serverList);
 			serverList = null;
 		}
-
-		private readonly TraceSource log;
 
 		private IOPCServerList serverList;
 

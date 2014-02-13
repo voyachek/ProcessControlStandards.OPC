@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
-using ProcessControlStandarts.OPC.Core;
+using ProcessControlStandards.OPC.Core;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
 	class ItemValueWriter : IDisposable
 	{
@@ -20,10 +20,10 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			variantsToClear = new List<IntPtr>(values.Count);
 
             var position = 0;
-			var dataPtrAsLong = Values.ToInt64();
+            var valuesPtrAsLong = Values.ToInt64();
             foreach (var value in values)
             {
-	            var variant = new IntPtr(dataPtrAsLong + position);
+                var variant = new IntPtr(valuesPtrAsLong + position);
 	            variantsToClear.Add(variant);
 	            Marshal.GetNativeVariantForObject(value, variant);
 	            

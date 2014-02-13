@@ -7,8 +7,8 @@
     <ProjectGuid>{3F36095A-CCBD-4073-97C9-C7381475AAED}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProcessControlStandarts.OPC.DataAccessClient</RootNamespace>
-    <AssemblyName>ProcessControlStandarts.OPC.DataAccessClient</AssemblyName>
+    <RootNamespace>ProcessControlStandards.OPC.DataAccessClient</RootNamespace>
+    <AssemblyName>ProcessControlStandards.OPC.DataAccessClient</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -31,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <DocumentationFile>bin\Release\ProcessControlStandards.OPC.DataAccessClient.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -45,6 +46,7 @@
     <Compile Include="IOPCDataCallback.cs" />
     <Compile Include="IOPCGroupStateMgt.cs" />
     <Compile Include="IOPCSyncIO.cs" />
+    <Compile Include="ItemPropertyResultReader.cs" />
     <Compile Include="ItemValueReader.cs" />
     <Compile Include="DataSource.cs" />
     <Compile Include="Group.cs" />

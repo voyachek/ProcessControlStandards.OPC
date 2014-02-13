@@ -5,47 +5,83 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
-using ProcessControlStandarts.OPC.Core;
+using ProcessControlStandards.OPC.Core;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
+    /// <summary>
+    /// OPC DA Server client. Helps to connect to the OPC DA server.
+    /// </summary>
 	public class DAServer : Server
 	{
+        /// <summary>
+        /// Category UUID of OPC DA 1.0.
+        /// </summary>
 		public static readonly Guid Version10 = new Guid("{63D5F430-CFE4-11d1-B2C8-0060083BA1FB}");
 
-		public static readonly Guid Version20 = new Guid("{63D5F432-CFE4-11d1-B2C8-0060083BA1FB}");
+        /// <summary>
+        /// Category UUID of OPC DA 2.0.
+        /// </summary>
+        public static readonly Guid Version20 = new Guid("{63D5F432-CFE4-11d1-B2C8-0060083BA1FB}");
 
+        /// <summary>
+        /// Connects to specified OPC DA Server.
+        /// </summary>
+        /// <param name="id">UUID of OPC DA Server.</param>
 		public DAServer(Guid id) :
 			this(id, string.Empty)
 		{
 		}
 
+        /// <summary>
+        /// Connects to specified OPC DA Server.
+        /// </summary>
+        /// <param name="id">Program ID of OPC DA Server.</param>
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public DAServer(string id) :
 			this(id, string.Empty)
 		{
 		}
 
+        /// <summary>
+        /// Connects to specified remote OPC DA Server.
+        /// </summary>
+        /// <param name="id">UUID of OPC DA Server.</param>
+        /// <param name="host">Host name or IP address of computer with OPC DA Server.</param>
 		public DAServer(Guid id, string host) : base(id, host)
 		{
 			server = (IOPCServer) Common;
 		}
 
+        /// <summary>
+        /// Connects to specified remote OPC DA Server.
+        /// </summary>
+        /// <param name="id">Program ID of OPC DA Server.</param>
+        /// <param name="host">Host name or IP address of computer with OPC DA Server.</param>
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public DAServer(string id, string host) : base(id, host)
 		{		
 			server = (IOPCServer) Common;
 		}
 
-		public ServerAddressSpaceBrowser GetAddressSpaceBrowser()
+        /// <summary>
+        /// Returns browser of OPC DA Server namespace.
+        /// </summary>
+        /// <param name="blockSize">Number of item names to read in one call.</param>
+        /// <returns>Browser of OPC DA Server namespace.</returns>
+		public ServerAddressSpaceBrowser GetAddressSpaceBrowser(int blockSize = 1000)
 		{
 			DisposedCheck();
 
-			return new ServerAddressSpaceBrowser(server);
+            return new ServerAddressSpaceBrowser(server, blockSize);
 		}
 		
+        /// <summary>
+        /// Returns an object that helps to read the information about items.
+        /// </summary>
+        /// <returns>Object that helps to read the information about items.</returns>
 		public ItemProperties GetItemProperties()
 		{
 			DisposedCheck();
@@ -53,6 +89,16 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			return new ItemProperties(server);
 		}
 	
+        /// <summary>
+        /// Creates new OPC DA group.
+        /// </summary>
+        /// <param name="clientId">Group client ID.</param>
+        /// <param name="name">Group name.</param>
+        /// <param name="active">Initial state.</param>
+        /// <param name="updateRate">Item values update rate in milliseconds.</param>
+        /// <param name="percentDeadband">Item values deadband in percents.</param>
+        /// <returns>New OPC DA group.</returns>
+        /// <remarks>Uses current timezone.</remarks>
 		public Group AddGroup(int clientId, string name, bool active, int updateRate, float percentDeadband)
 		{
 			var timeBias = (int)TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).TotalMinutes;
@@ -60,14 +106,24 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			return AddGroup(clientId, name, active, updateRate, percentDeadband, timeBias);
 		}
 
-		public Group AddGroup(int clientId, string name, bool active, int updateRate, float percentDeadband, int timeBias)
+        /// <summary>
+        /// Creates new OPC DA group.
+        /// </summary>
+        /// <param name="clientId">Group client ID.</param>
+        /// <param name="name">Group name.</param>
+        /// <param name="active">Initial state.</param>
+        /// <param name="updateRate">Item values update rate in milliseconds.</param>
+        /// <param name="percentDeadband">Item values deadband in percents.</param>
+        /// <param name="timeBias">Timezone time bias.</param>
+        /// <returns>New OPC DA group.</returns>
+        public Group AddGroup(int clientId, string name, bool active, int updateRate, float percentDeadband, int timeBias)
 		{
 			DisposedCheck();
 			name.ArgumentNotNullOrEmpty("name");
 
 			object group;
 			int serverId;
-			var iid = typeof(IOPCItemMgt).GUID;
+			var id = typeof(IOPCItemMgt).GUID;
 
 			server.AddGroup(
 				name,
@@ -79,12 +135,17 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 				(uint)CultureInfo.CurrentUICulture.LCID,
 				out serverId,
 				out updateRate,
-				ref iid,
+                ref id,
 				out group);
 
 			return new Group(this, clientId, serverId, name, updateRate, (IOPCItemMgt)group);
 		}
 
+        /// <summary>
+        /// Converts error code to localized message based on current OPC Server locale.
+        /// </summary>
+        /// <param name="code">Error code.</param>
+        /// <returns>Message for specified error code.</returns>
 		public override string GetErrorString(int code)
 		{
 			DisposedCheck();
@@ -94,6 +155,10 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			return result;
 		}
 
+        /// <summary>
+        /// Retrieves OPC DA Server properties.
+        /// </summary>
+        /// <returns>OPC DA Server properties.</returns>
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public ServerProperties GetProperties()
 		{
@@ -153,9 +218,11 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 
 				// string szVendorInfo;
 				var vendorInfo = Marshal.ReadIntPtr(dataPtr, position);
-				result.VendorInfo = Marshal.PtrToStringUni(vendorInfo);
-				if(vendorInfo != IntPtr.Zero)
-					Marshal.FreeCoTaskMem(vendorInfo);
+			    if (vendorInfo != IntPtr.Zero)
+			    {
+                    result.VendorInfo = Marshal.PtrToStringUni(vendorInfo);
+                    Marshal.FreeCoTaskMem(vendorInfo);
+			    }
 
 				return result;
 			}

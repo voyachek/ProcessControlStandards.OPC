@@ -2,9 +2,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-using ProcessControlStandarts.OPC.TestTool.Commands;
+using ProcessControlStandards.OPC.TestTool.Commands;
 
-namespace ProcessControlStandarts.OPC.TestTool.Models
+namespace ProcessControlStandards.OPC.TestTool.Models
 {
 	public class Node : INotifyPropertyChanged
 	{
@@ -31,7 +31,7 @@ namespace ProcessControlStandarts.OPC.TestTool.Models
 
 		public ObservableCollection<Node> Children { get; private set; }
 
-		public virtual IList<Command> Commands { get; protected set; }
+        public virtual IList<ICommand> Commands { get; protected set; }
 
 		public event PropertyChangedEventHandler PropertyChanged;
 

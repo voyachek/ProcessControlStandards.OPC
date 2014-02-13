@@ -1,4 +1,4 @@
-﻿namespace ProcessControlStandarts.OPC.TestTool
+﻿namespace ProcessControlStandards.OPC.TestTool
 {
 	/// <summary>
 	/// Interaction logic for App.xaml

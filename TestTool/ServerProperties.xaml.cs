@@ -4,19 +4,17 @@ using System;
 using System.Diagnostics;
 using System.Windows.Threading;
 
-using ProcessControlStandarts.OPC.TestTool.Models;
+using ProcessControlStandards.OPC.TestTool.Models;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool
+namespace ProcessControlStandards.OPC.TestTool
 {
 	/// <summary>
 	/// Interaction logic for ServerProperties.xaml
 	/// </summary>
 	public partial class ServerProperties
 	{
-		private readonly ServerNode node;
-
 		public ServerProperties(ServerNode node)
 		{
 			this.node = node;
@@ -63,6 +61,8 @@ namespace ProcessControlStandarts.OPC.TestTool
 		{
 			updatePropertiesTimer.Stop();
 		}
+
+        private readonly ServerNode node;
 
 		private readonly Models.ServerProperties properties = new Models.ServerProperties();
 

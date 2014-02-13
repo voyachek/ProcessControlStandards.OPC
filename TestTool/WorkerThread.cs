@@ -8,7 +8,7 @@ using System.Threading;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool
+namespace ProcessControlStandards.OPC.TestTool
 {
 	public class WorkerThread : IDisposable
 	{
@@ -38,7 +38,7 @@ namespace ProcessControlStandarts.OPC.TestTool
 		{
 			lock (((ICollection)queue).SyncRoot)
 			{
-				queue.Enqueue(task);
+				queue.Add(task);
 				newItemEvent.Set();
 			}
 		}
@@ -53,20 +53,26 @@ namespace ProcessControlStandarts.OPC.TestTool
 		{
 			while (WaitHandle.WaitAny(eventArray) != 1)
 			{
-				lock (((ICollection)queue).SyncRoot)
-				{
-	                DoTask(queue.Dequeue());
-				}
-			} 
-
-			lock (((ICollection) queue).SyncRoot)
-			{
-				while (queue.Count != 0)
-					DoTask(queue.Dequeue());
+				DoTasks();
 			}
+
+            DoTasks();
 		}
 
-		private void DoTask(Task task)
+	    private void DoTasks()
+	    {
+            List<Task> tasks;
+	        lock (((ICollection) queue).SyncRoot)
+	        {
+                tasks = new List<Task>(queue);
+                queue.Clear();
+	        }
+
+            foreach(var task in tasks)
+                DoTask(task);
+	    }
+
+	    private void DoTask(Task task)
 		{
 			RunWorkerCompletedEventArgs resultArgs;
 			try
@@ -79,7 +85,8 @@ namespace ProcessControlStandarts.OPC.TestTool
 			{
 				resultArgs = new RunWorkerCompletedEventArgs(null, e, false);
 			}
-			synchronizationContext.Post(state => task.Completed(task, resultArgs), resultArgs);			
+            if (task.Completed != null)
+			    synchronizationContext.Post(state => task.Completed(task, resultArgs), resultArgs);			
 		}
 
 		private readonly SynchronizationContext synchronizationContext;
@@ -90,7 +97,7 @@ namespace ProcessControlStandarts.OPC.TestTool
 		
 		private readonly WaitHandle[] eventArray;
 
-		private readonly Queue<Task> queue = new Queue<Task>();
+        private readonly List<Task> queue = new List<Task>();
 
 		private readonly Thread thread;
 	}

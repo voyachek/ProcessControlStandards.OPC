@@ -1,32 +1,27 @@
 ﻿#region using
 
-using ProcessControlStandarts.OPC.TestTool.Models;
-using ProcessControlStandarts.OPC.TestTool.Properties;
+using ProcessControlStandards.OPC.TestTool.Models;
+using ProcessControlStandards.OPC.TestTool.Properties;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Commands
+namespace ProcessControlStandards.OPC.TestTool.Commands
 {
-	public class ConnectServerCommand : Command
+    public class ConnectServerCommand : Command<ServerNode>
 	{
-		public ConnectServerCommand() : base(Resources.ConnectServer)
+		public ConnectServerCommand() 
+            : base(Resources.ConnectServer)
 		{
 		}
 
-		public override void Execute(object parameter)
+        protected override void Execute(ServerNode node)
 		{
-			var node = (ServerNode) parameter;
-
 			node.Connect();
 		}
 
-		public override bool CanExecute(object parameter)
+        protected override bool CanExecute(ServerNode node)
 		{
-			var node = (ServerNode) parameter;
-			if (node == null)
-				return false;
-
-			return !node.Connected;
+			return node != null && node.Connected;
 		}
 	}
 }

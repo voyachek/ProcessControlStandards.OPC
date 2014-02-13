@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Models
+namespace ProcessControlStandards.OPC.TestTool.Models
 {
 	public class ServersTree
 	{
@@ -27,7 +27,7 @@ namespace ProcessControlStandarts.OPC.TestTool.Models
 			DisposeChildren(Children);
 		}
 
-		private void DisposeChildren(IEnumerable<Node> nodes)
+		private static void DisposeChildren(IEnumerable<Node> nodes)
 		{
 			foreach (var node in nodes)
 			{

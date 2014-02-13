@@ -1,32 +1,27 @@
 ﻿#region using
 
-using ProcessControlStandarts.OPC.TestTool.Models;
-using ProcessControlStandarts.OPC.TestTool.Properties;
+using ProcessControlStandards.OPC.TestTool.Models;
+using ProcessControlStandards.OPC.TestTool.Properties;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Commands
+namespace ProcessControlStandards.OPC.TestTool.Commands
 {
-	public class DisconnectServerCommand : Command
+    public class DisconnectServerCommand : Command<ServerNode>
 	{
-		public DisconnectServerCommand() : base(Resources.DisconnectServer)
+		public DisconnectServerCommand() 
+            : base(Resources.DisconnectServer)
 		{
 		}
 
-		public override void Execute(object parameter)
+        protected override void Execute(ServerNode node)
 		{
-			var node = (ServerNode) parameter;
-
 			node.Disconnect();
 		}
 
-		public override bool CanExecute(object parameter)
-		{
-			var node = (ServerNode) parameter;
-			if (node == null)
-				return false;
-
-			return node.Connected;
-		}
+        protected override bool CanExecute(ServerNode node)
+        {
+            return node != null && node.Connected;
+        }
 	}
 }

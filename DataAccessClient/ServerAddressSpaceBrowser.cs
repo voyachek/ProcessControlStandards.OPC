@@ -4,16 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-using ProcessControlStandarts.OPC.Core;
+using ProcessControlStandards.OPC.Core;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
+    /// <summary>
+    /// Helps to read OPC DA Server namespace.
+    /// </summary>
 	public class ServerAddressSpaceBrowser
 	{
-		internal ServerAddressSpaceBrowser(IOPCServer server)
-		{
+        internal ServerAddressSpaceBrowser(IOPCServer server, int blockSize)
+        {
+            this.blockSize = blockSize;
 			try
 			{
 				browseServerSpace = (IOPCBrowseServerAddressSpace) server;
@@ -24,6 +28,9 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			}
 		}
 
+        /// <summary>
+        /// Queries namespace organization.
+        /// </summary>
 		public NamespaceType NamespaceType
 		{
 			get
@@ -34,33 +41,55 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			}
 		}
 
+        /// <summary>
+        /// Change current browse position.
+        /// </summary>
+        /// <param name="direction">The direction to browse OPC Server namespace. See <see cref="BrowseDirection"/>.</param>
+        /// <param name="filter">Mask of item/folder name.</param>
 		public void ChangeBrowsePosition(BrowseDirection direction, string filter)
 		{
 			browseServerSpace.ChangeBrowsePosition(direction, filter);				
 		}
 
-		public IEnumerable<string> GetItemIds(BrowseType type, string filterCriteria, short dataTypeFilter, int accessRightsFilter)
+        /// <summary>
+        /// Retrieves enumerator of current branch.
+        /// </summary>
+        /// <param name="type">Namespace browse mode. See <see cref="BrowseType"/></param>
+        /// <param name="filterCriteria">Mask of item/folder name.</param>
+        /// <param name="dataTypeFilter">Filter by type.</param>
+        /// <param name="accessRightsFilter">Filter by access rights.</param>
+        /// <returns>Enumerator of current namespace level.</returns>
+		public IEnumerable<string> GetItemIds(BrowseType type, string filterCriteria, VarEnum dataTypeFilter, int accessRightsFilter)
 		{
-			IEnumString enumerator;
+            IEnumString enumerator;
 			browseServerSpace.BrowseOPCItemIDs(
 				type, 
-				filterCriteria, 
-				dataTypeFilter, 
+				filterCriteria,
+                (short)dataTypeFilter, 
 				accessRightsFilter, 
 				out enumerator);								
 
 			try
 			{
 				enumerator.Reset();
+			    var itemBlock = new Queue<string>(blockSize);
 				while(true)
 				{
-					string itemId;
-					uint fetched;
-					enumerator.RemoteNext(1, out itemId, out fetched);
-					if(fetched == 0)
+				    if (itemBlock.Count == 0)
+				    {
+                        var itemIds = new string[blockSize];
+                        uint fetched;
+                        var res = enumerator.Next((uint)blockSize, itemIds, out fetched);
+                        if (res > 1)
+                            Marshal.ThrowExceptionForHR(res);
+                        for(var i = 0; i < fetched; i++)
+                            itemBlock.Enqueue(itemIds[i]);
+                    }
+
+                    if (itemBlock.Count == 0)
 						break;
 
-					yield return itemId;					
+                    yield return itemBlock.Dequeue();					
 				}            
 			}
 			finally
@@ -70,6 +99,11 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			}
 		}
 
+        /// <summary>
+        /// Gets the full item name of the specified name in the current branch.
+        /// </summary>
+        /// <param name="itemDataId">Item short name.</param>
+        /// <returns>Item full name.</returns>
 		public string GetItemId(string itemDataId)
 		{
 			itemDataId.ArgumentNotNullOrEmpty("itemDataId");
@@ -79,6 +113,11 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			return result;
 		}
 
+        /// <summary>
+        /// Retrieves enumerator of access path to specified item.
+        /// </summary>
+        /// <param name="itemId">Name of item.</param>
+        /// <returns>Enumerator of access path to specified item.</returns>
 		public IEnumerable<string> BrowseAccessPaths(string itemId)
 		{
 			itemId.ArgumentNotNullOrEmpty("itemId");
@@ -89,15 +128,22 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			try
 			{
 				enumerator.Reset();
-				while(true)
+                var pathsBlock = new Queue<string>(blockSize);
+                while (true)
 				{
-					string path;
-					uint fetched;
-					enumerator.RemoteNext(1, out path, out fetched);
-					if(fetched == 0)
-						break;
+                    if (pathsBlock.Count == 0)
+				    {
+                        var paths = new string[blockSize];
+                        uint fetched;
+                        var res = enumerator.Next((uint)blockSize, paths, out fetched);
+                        if (res > 1)
+                            Marshal.ThrowExceptionForHR(res);
+                    }
 
-					yield return path;
+                    if (pathsBlock.Count == 0)
+                        break;
+
+                    yield return pathsBlock.Dequeue();
 				}
 			}
 			finally
@@ -106,6 +152,8 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 					Marshal.ReleaseComObject(enumerator);
 			}
 		}
+
+	    private readonly int blockSize;
 
 		private readonly IOPCBrowseServerAddressSpace browseServerSpace;
 	}

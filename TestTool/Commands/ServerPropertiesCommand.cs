@@ -1,27 +1,25 @@
 ﻿#region using
 
-using ProcessControlStandarts.OPC.TestTool.Models;
-using ProcessControlStandarts.OPC.TestTool.Properties;
+using ProcessControlStandards.OPC.TestTool.Models;
+using ProcessControlStandards.OPC.TestTool.Properties;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.TestTool.Commands
+namespace ProcessControlStandards.OPC.TestTool.Commands
 {
-	public class ServerPropertiesCommand : Command
+    public class ServerPropertiesCommand : Command<ServerNode>
 	{
-		public ServerPropertiesCommand() : base(Resources.Properties)
+		public ServerPropertiesCommand() 
+            : base(Resources.Properties)
 		{
 		}
 
-		public override void Execute(object parameter)
+        protected override void Execute(ServerNode node)
 		{
-			var node = (ServerNode) parameter;
-
-			var propertiesDialog = new ServerProperties(node);
-			propertiesDialog.ShowDialog();
+            new ServerProperties(node).ShowDialog();
 		}
 
-		public override bool CanExecute(object parameter)
+        protected override bool CanExecute(ServerNode node)
 		{
 			return true;
 		}

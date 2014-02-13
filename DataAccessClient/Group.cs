@@ -7,12 +7,15 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security.Permissions;
 
-using ProcessControlStandarts.OPC.Core;
+using ProcessControlStandards.OPC.Core;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
+    /// <summary>
+    /// OPC DA group. Helps to access to item values.
+    /// </summary>
 	public class Group : IDisposable
 	{
 		#region DataCallback
@@ -91,7 +94,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			UpdateRate = updateRate;
 
 			syncIO = (IOPCSyncIO) @group;
-			groupManagment = (IOPCGroupStateMgt) @group;
+			groupManagement = (IOPCGroupStateMgt) @group;
 			try
 			{
 				asyncIO = (IOPCAsyncIO2) @group;				
@@ -114,6 +117,9 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			Dispose(false);
 		}
 
+        /// <summary>
+        /// Item values is changed.
+        /// </summary>
 		public event EventHandler<DataChangeEventArgs> DataChange
 		{
 			add
@@ -130,6 +136,9 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			}
 		}
 
+        /// <summary>
+        /// Reading data is completed.
+        /// </summary>
 		public event EventHandler<DataChangeEventArgs> ReadComplete
 		{
 			add
@@ -146,6 +155,9 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			}
 		}
 
+        /// <summary>
+        /// Writing data is completed.
+        /// </summary>
 		public event EventHandler<WriteCompleteEventArgs> WriteComplete
 		{
 			add
@@ -162,6 +174,9 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			}
 		}
 
+        /// <summary>
+        /// Cancellation is completed.
+        /// </summary>
 		public event EventHandler<CompleteEventArgs> CancelComplete
 		{
 			add
@@ -178,19 +193,38 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			}
 		}
 
+        /// <summary>
+        /// OPC DA group client ID.
+        /// </summary>
 		public int ClientId { get; private set; }
 
+        /// <summary>
+        /// OPC DA group server ID.
+        /// </summary>
 		public int ServerId { get; private set; }
 
+        /// <summary>
+        /// Name of OPC DA group.
+        /// </summary>
 		public string Name { get; private set; }
 
+        /// <summary>
+        /// Item values update rate.
+        /// </summary>
 		public int UpdateRate { get; private set; }
 
+        /// <summary>
+        /// true - OPC DA server supports asynchronous reading.
+        /// </summary>
         public bool IsAsyncIOSupported
         {
             get { return asyncIO != null && connectionPointContainer != null; }
         }
 
+        /// <summary>
+        /// Retrieves OPC DA group properties.
+        /// </summary>
+        /// <returns>OPC DA group properties.</returns>
 		public GroupProperties GetProperties()
 		{
 			if(@group == null)
@@ -200,7 +234,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			float percentDeadband;
 			int updateRate, activeAsInt, timeBias, locale, clientId, serverId;
 
-			groupManagment.GetState(
+			groupManagement.GetState(
 				out updateRate, 
 				out activeAsInt, 
 				out name, 
@@ -223,13 +257,17 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			};
 		}
 
+        /// <summary>
+        /// Sets new OPC DA group properties.
+        /// </summary>
+        /// <param name="properties">New OPC DA group properties.</param>
 		public void SetProperties(GroupProperties properties)
 		{
 			if(@group == null)
 				throw new ObjectDisposedException("Group");
 
 			int revisedUpdateRate;
-			groupManagment.SetState(
+			groupManagement.SetState(
 				properties.UpdateRate, 
 				out revisedUpdateRate, 
 				properties.Active ? 1 : 0, 
@@ -242,10 +280,15 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			UpdateRate = revisedUpdateRate;
 
 			if(string.Equals(properties.Name, Name))
-				groupManagment.SetName(properties.Name);
+				groupManagement.SetName(properties.Name);
 			Name = properties.Name;
 		}
 
+        /// <summary>
+        /// Adds items to OPC DA group to read/write their values.
+        /// </summary>
+        /// <param name="items">Items to add.</param>
+        /// <returns>Result of each item adding .</returns>
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public ItemResult[] AddItems(Item[] items)
 		{
@@ -257,14 +300,18 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 
 			using(var reader = new ItemResultReader(items))
 			{
-				int[] errors;
 				IntPtr dataPtr;
-				@group.AddItems((uint)items.Length, reader.Items, out dataPtr, out errors);
-
-				return reader.Read(dataPtr, errors);
+			    IntPtr errorsPtr;
+                @group.AddItems((uint)items.Length, reader.Items, out dataPtr, out errorsPtr);
+                return reader.Read(dataPtr, errorsPtr);
 			}				
 		}
 
+        /// <summary>
+        /// Tests OPC DA group items before adding.
+        /// </summary>
+        /// <param name="items">Items to test.</param>
+        /// <returns>>Result of each item testing .</returns>
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public ItemResult[] ValidateItems(Item[] items)
 		{
@@ -276,14 +323,20 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 
 			using(var reader = new ItemResultReader(items))
 			{
-				int[] errors;
 				IntPtr dataPtr;
-				@group.ValidateItems((uint)items.Length, reader.Items, 0, out dataPtr, out errors);
+                IntPtr errorsPtr;
+                @group.ValidateItems((uint)items.Length, reader.Items, 0, out dataPtr, out errorsPtr);
 
-				return reader.Read(dataPtr, errors);
+                return reader.Read(dataPtr, errorsPtr);
 			}				
 		}
 
+        /// <summary>
+        /// Removes OPC DA group items to stop reading/writing their values.
+        /// </summary>
+        /// <param name="serverIds">Server ID of items.</param>
+        /// <returns>Result of each item removing.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
 		public int[] RemoveItems(int[] serverIds)
 		{
 			if(@group == null)
@@ -292,13 +345,20 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			if(serverIds.Length == 0)
 				return new int[0];
 
-			int[] errors;
-			@group.RemoveItems((uint)serverIds.Length, serverIds, out errors);
+            IntPtr errorsPtr;
+            @group.RemoveItems((uint)serverIds.Length, serverIds, out errorsPtr);
 
-			return errors;
+            return ItemResultReader.Read(serverIds.Length, errorsPtr);
 		}
 
-		public int[] SetActiveState(int[] serverIds, bool active)
+        /// <summary>
+        /// Changes OPC Da group item state.
+        /// </summary>
+        /// <param name="serverIds">Server ID of items.</param>
+        /// <param name="active">true - active state.</param>
+        /// <returns>Result of each item changing.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
+        public int[] SetActiveState(int[] serverIds, bool active)
 		{
 			if(@group == null)
 				throw new ObjectDisposedException("Group");
@@ -306,13 +366,20 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			if(serverIds.Length == 0)
 				return new int[0];
 
-			int[] errors;
-			@group.SetActiveState((uint)serverIds.Length, serverIds, active ? 1 : 0, out errors);
+            IntPtr errorsPtr;
+            @group.SetActiveState((uint)serverIds.Length, serverIds, active ? 1 : 0, out errorsPtr);
 
-			return errors;
+            return ItemResultReader.Read(serverIds.Length, errorsPtr);
 		}
-
-		public int[] SetClientHandles(int[] serverIds, int[] clientIds)
+        
+        /// <summary>
+        /// Sets client ID for each OPC DA group item.
+        /// </summary>
+        /// <param name="serverIds">Server ID of items.</param>
+        /// <param name="clientIds">New client ID of items.</param>
+        /// <returns>Result of each item changing.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
+        public int[] SetClientHandles(int[] serverIds, int[] clientIds)
 		{
 			if(@group == null)
 				throw new ObjectDisposedException("Group");
@@ -320,13 +387,20 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			if(serverIds.Length == 0)
 				return new int[0];
 
-			int[] errors;
-			@group.SetClientHandles((uint)serverIds.Length, serverIds, clientIds, out errors);
+            IntPtr errorsPtr;
+            @group.SetClientHandles((uint)serverIds.Length, serverIds, clientIds, out errorsPtr);
 
-			return errors;			
+            return ItemResultReader.Read(serverIds.Length, errorsPtr);
 		}
 
-		public int[] SetDatatypes(int[] serverIds, VarEnum[] types)
+        /// <summary>
+        /// Sets data type for each OPC DA group item.
+        /// </summary>
+        /// <param name="serverIds">Server ID of items.</param>
+        /// <param name="types">New data type of items.</param>
+        /// <returns>Result of each item changing.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
+        public int[] SetDatatypes(int[] serverIds, VarEnum[] types)
 		{
 			if(@group == null)
 				throw new ObjectDisposedException("Group");
@@ -334,15 +408,22 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			if(serverIds.Length == 0)
 				return new int[0];
 
-			int[] errors;
 			var typesAsShort = new short[types.Length];
 			for (var i = 0; i < types.Length; i++)
 				typesAsShort[i] = (short)types[i];
-			@group.SetDatatypes((uint)serverIds.Length, serverIds, typesAsShort, out errors);
 
-			return errors;				
+            IntPtr errorsPtr;
+            @group.SetDatatypes((uint)serverIds.Length, serverIds, typesAsShort, out errorsPtr);
+
+            return ItemResultReader.Read(serverIds.Length, errorsPtr);			
 		}
 
+        /// <summary>
+        /// Reads OPC DA group item values synchronous.
+        /// </summary>
+        /// <param name="source">Read mode, see <see cref="DataSource"/>.</param>
+        /// <param name="serverIds">Server ID of items.</param>
+        /// <returns>OPC DA group item values.</returns>
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public ItemValue[] SyncReadItems(DataSource source, int[] serverIds)
 		{
@@ -352,14 +433,21 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			if(serverIds.Length == 0)
 				return new ItemValue[0];
 
-			int[] errors;
 			IntPtr dataPtr;
-			syncIO.Read(source, (uint)serverIds.Length, serverIds, out dataPtr, out errors);
+            IntPtr errorsPtr;
+            syncIO.Read(source, (uint)serverIds.Length, serverIds, out dataPtr, out errorsPtr);
 
-			return ItemValueReader.Read(dataPtr, errors);
+            return ItemValueReader.Read(serverIds.Length, dataPtr, errorsPtr);
 		}
 
-		public int[] SyncWriteItems(int[] serverIds, object[] values)
+        /// <summary>
+        /// Writes OPC DA group item values synchronous.
+        /// </summary>
+        /// <param name="serverIds">Server ID of items.</param>
+        /// <param name="values">Item values.</param>
+        /// <returns>>Result of each item writing.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
+        public int[] SyncWriteItems(int[] serverIds, object[] values)
 		{
 			if(@group == null)
 				throw new ObjectDisposedException("Group");
@@ -370,13 +458,21 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 
 			using(var writer = new ItemValueWriter(values))
 			{
-				int[] errors;
-				syncIO.Write((uint)serverIds.Length, serverIds, writer.Values, out errors);
+                IntPtr errorsPtr;
+                syncIO.Write((uint)serverIds.Length, serverIds, writer.Values, out errorsPtr);
 
-				return errors;
+                return ItemResultReader.Read(serverIds.Length, errorsPtr);
 			}
 		}
 
+        /// <summary>
+        /// Reads OPC DA group item values asynchronous.
+        /// </summary>
+        /// <param name="serverIds">Server ID of items.</param>
+        /// <param name="transactionId">Transaction ID.</param>
+        /// <param name="cancelId">Cancellation ID.</param>
+        /// <returns>Result of starting of each item reading.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
         public int[] AsyncReadItems(int[] serverIds, int transactionId, out int cancelId)
         {
             cancelId = 0;
@@ -389,13 +485,22 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
                 return new int[0];
 
             int tmp;
-            int[] errors;
-            asyncIO.Read((uint)serverIds.Length, serverIds, transactionId, out tmp, out errors);
+            IntPtr errorsPtr;
+            asyncIO.Read((uint)serverIds.Length, serverIds, transactionId, out tmp, out errorsPtr);
 
 			cancelId = tmp;
-	        return errors;
+            return ItemResultReader.Read(serverIds.Length, errorsPtr);
         }
 
+        /// <summary>
+        /// Writes OPC DA group item values asynchronous.
+        /// </summary>
+        /// <param name="serverIds">Server ID of items.</param>
+        /// <param name="values">Item values to write.</param>
+        /// <param name="transactionId">Transaction ID.</param>
+        /// <param name="cancelId">Cancellation ID.</param>
+        /// <returns>Result of starting of each item writing.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
         public int[] AsyncWriteItems(int[] serverIds, object[] values, int transactionId, out int cancelId)
         {
             cancelId = 0;
@@ -410,14 +515,20 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
             using(var writer = new ItemValueWriter(values))
             {
                 int tmp;
-                int[] errors;
-				asyncIO.Write((uint)serverIds.Length, serverIds, writer.Values, transactionId, out tmp, out errors);
+                IntPtr errorsPtr;
+                asyncIO.Write((uint)serverIds.Length, serverIds, writer.Values, transactionId, out tmp, out errorsPtr);
 
                 cancelId = tmp;
-                return errors;
+                return ItemResultReader.Read(serverIds.Length, errorsPtr);
             }
         }
 
+        /// <summary>
+        /// Starts refresh of item values reading in OPC DA group.
+        /// </summary>
+        /// <param name="source">Read mode, see <see cref="DataSource"/>.</param>
+        /// <param name="transactionId">Transaction ID.</param>
+        /// <param name="cancelId">Cancellation ID.</param>
         public void AsyncRefresh(DataSource source, int transactionId, out int cancelId)
         {
             cancelId = 0;
@@ -432,6 +543,10 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
             cancelId = tmp;
         }
 
+        /// <summary>
+        /// Cancels transaction.
+        /// </summary>
+        /// <param name="cancelId">Cancellation ID.</param>
         public void AsyncCancel(int cancelId)
         {
 			if(@group == null)
@@ -440,6 +555,10 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
             asyncIO.Cancel2(cancelId);
         }
 
+        /// <summary>
+        /// Enables asynchronous mode.
+        /// </summary>
+        /// <param name="enable">Asynchronous mode.</param>
         public void AsyncSetEnable(bool enable)
         {
 			if(@group == null)
@@ -450,6 +569,10 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
             asyncIO.SetEnable(enable ? 1 : 0);	        
         }
 
+        /// <summary>
+        /// Retrieves asynchronous mode.
+        /// </summary>
+        /// <returns>Asynchronous mode.</returns>
         public bool AsyncGetEnable()
         {
 			if(@group == null)
@@ -463,6 +586,9 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 	        return tmp != 0;
         }
 
+        /// <summary>
+        /// Removes OPC DA group from server.
+        /// </summary>
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public void Dispose()
 		{
@@ -471,7 +597,11 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			GC.SuppressFinalize(this);
 		}
 
-		[SecurityPermission(SecurityAction.LinkDemand)] 
+        /// <summary>
+        /// Removes OPC DA group from server.
+        /// </summary>
+        /// <param name="disposing">true - call in Dispose.</param>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
 		protected virtual void Dispose(bool disposing)
 		{
 			if(@group != null)				
@@ -525,7 +655,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 
 		private IOPCItemMgt @group;
 
-		private readonly IOPCGroupStateMgt groupManagment;
+		private readonly IOPCGroupStateMgt groupManagement;
 
 		private readonly IOPCSyncIO syncIO;
 

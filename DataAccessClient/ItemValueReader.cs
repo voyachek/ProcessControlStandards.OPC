@@ -1,30 +1,27 @@
 ﻿#region using
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
-using ProcessControlStandarts.OPC.Core;
+using ProcessControlStandards.OPC.Core;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
 	class ItemValueReader : IDisposable
 	{
 		public ItemValueReader(int[] clientIds, IntPtr values, short[] qualities, long[] timeStamps, int[] errors)
 		{
 			this.values = values;
-			variantsToClear = new List<IntPtr>(clientIds.Length);
             Values = new ItemValue[qualities.Length];
 
             var position = 0;
-			var dataPtrAsLong = values.ToInt64();
+            var valuesAsLong = values.ToInt64();
             for (var i = 0; i < clientIds.Length; i++)
             {
-	            var variant = new IntPtr(dataPtrAsLong + position);
-				variantsToClear.Add(variant);
+                var variant = new IntPtr(valuesAsLong + position);
 				position += NativeMethods.VariantSize;
 
 	            Values[i] = new ItemValue
@@ -35,6 +32,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 		            Value = Marshal.GetObjectForNativeVariant(variant),
 		            Error = errors[i],
 	            };
+                NativeMethods.VariantClear(variant);
             }
 		}
 
@@ -45,15 +43,15 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 
 		public ItemValue[] Values { get; private set; }
 
-		[SecurityPermission(SecurityAction.LinkDemand)] 
-		public static ItemValue[] Read(IntPtr dataPtr, int[] errors)
+		[SecurityPermission(SecurityAction.LinkDemand)]
+        public static ItemValue[] Read(int size, IntPtr dataPtr, IntPtr errorsPtr)
         {
 	        try
 	        {
 		        var position = 0;
-		        var dataPtrAsLong = dataPtr.ToInt64();
-		        var result = new ItemValue[errors.Length];
-		        for (var i = 0; i < errors.Length; i++)
+                var dataPtrAsLong = dataPtr.ToInt64();
+                var result = new ItemValue[size];
+                for (var i = 0; i < size; i++)
 		        {
 			        // ReSharper disable UseObjectOrCollectionInitializer
 			        result[i] = new ItemValue();
@@ -69,20 +67,22 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			        position += sizeof (long);
 
 			        // ushort wQuality;
-			        result[i].Quality =
-				        Marshal.ReadInt16(dataPtr, position);
+			        result[i].Quality = Marshal.ReadInt16(dataPtr, position);
 			        position += sizeof (short);
 
 			        // ushort wReserved;
 			        position += sizeof (short);
 
 			        // VARIANT vDataValue;
-			        var variant = new IntPtr(dataPtrAsLong + position);
-			        result[i].Value = Marshal.GetObjectForNativeVariant(variant);
-					NativeMethods.VariantClear(variant);
+                    var variant = new IntPtr(dataPtrAsLong + position);
+		            if (variant != IntPtr.Zero)
+		            {
+                        result[i].Value = Marshal.GetObjectForNativeVariant(variant);
+                        NativeMethods.VariantClear(variant);
+                    }
 			        position += NativeMethods.VariantSize;
 
-			        result[i].Error = errors[i];
+                    result[i].Error = Marshal.ReadInt32(errorsPtr, i * sizeof(int));
 		        }
 
 		        return result;
@@ -90,6 +90,7 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 	        finally
 	        {
 				Marshal.FreeCoTaskMem(dataPtr);
+                Marshal.FreeCoTaskMem(errorsPtr);
 	        }
         }
 
@@ -105,15 +106,8 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
             if (values != IntPtr.Zero)
                 Marshal.FreeCoTaskMem(values);
             values = IntPtr.Zero;
-
-            if (variantsToClear != null)
-                foreach (var variant in variantsToClear)
-                    NativeMethods.VariantClear(variant);
-            variantsToClear = null;
 		}
 
 		private IntPtr values;
-
-		private List<IntPtr> variantsToClear;
 	}
 }

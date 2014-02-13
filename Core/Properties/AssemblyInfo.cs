@@ -9,9 +9,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("OPC Core")]
 [assembly: AssemblyDescription("OPC Core classes")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("ProcessControlStandarts")]
+[assembly: AssemblyCompany("ProcessControlStandards")]
 [assembly: AssemblyProduct("OPC Library")]
-[assembly: AssemblyCopyright("© ProcessControlStandarts 2013")]
+[assembly: AssemblyCopyright("© ProcessControlStandards 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
@@ -19,4 +19,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly:InternalsVisibleTo("ProcessControlStandarts.OPC.DataAccessClient")]
+[assembly:InternalsVisibleTo("ProcessControlStandards.OPC.DataAccessClient")]

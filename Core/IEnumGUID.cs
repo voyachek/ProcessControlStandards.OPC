@@ -6,19 +6,21 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.Core
+namespace ProcessControlStandards.OPC.Core
 {
 	[Guid("0002E000-0000-0000-C000-000000000046"), ComImport, InterfaceType((short)1)]
 	interface IEnumGUID
 	{
+        [PreserveSig]
 		[MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-		void Next(
-			[In] uint celt, 
-			[Out] out Guid gelt, 
+        int Next(
+			[In] uint celt,
+            [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] Guid[] rgelt,
 			[Out] out uint celtFetched);
 
+        [PreserveSig]
 		[MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-		void Skip([In] uint celt);
+		int Skip([In] uint celt);
 
 		[MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
 		void Reset();

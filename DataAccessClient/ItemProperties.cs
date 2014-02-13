@@ -4,12 +4,15 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
-using ProcessControlStandarts.OPC.Core;
+using ProcessControlStandards.OPC.Core;
 
 #endregion
 
-namespace ProcessControlStandarts.OPC.DataAccessClient
+namespace ProcessControlStandards.OPC.DataAccessClient
 {
+    /// <summary>
+    /// Access to OPC DA group item properties.
+    /// </summary>
 	public class ItemProperties
 	{
 		internal ItemProperties(IOPCServer server)
@@ -24,28 +27,31 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			}
 		}
 
+        /// <summary>
+        /// Retrieves list of item property descriptions.
+        /// </summary>
+        /// <param name="itemId">Name of item.</param>
+        /// <returns>List of item property descriptions.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
 		public ItemProperty[] QueryAvailableProperties(string itemId)
 		{
 			itemId.ArgumentNotNullOrEmpty("itemId");
+            
+            uint size;
+            IntPtr idsPtr, descriptionsPtr, typesPtr;
+            itemProperties.QueryAvailableProperties(
+                itemId, out size, out idsPtr, out descriptionsPtr, out typesPtr);
 
-			uint size;
-			int[] ids;
-			string[] descriptions;
-			VarEnum[] types;
-			itemProperties.QueryAvailableProperties(
-				itemId, out size, out ids, out descriptions, out types);
-
-			var result = new ItemProperty[size];
-			for(var i = 0; i < size; i++)
-			{
-				result[i].Id = ids[i];
-				result[i].Description = descriptions[i];
-				result[i].Type = types[i];
-			}
-
-			return result;
+            return ItemPropertyResultReader.ReadItemProperties(
+                size, idsPtr, descriptionsPtr, typesPtr);
 		}
 
+        /// <summary>
+        /// Retrieves list of item properties.
+        /// </summary>
+        /// <param name="itemId">Name of item.</param>
+        /// <param name="propertyIds">ID of properties.</param>
+        /// <returns>List of item properties.</returns>
 		[SecurityPermission(SecurityAction.LinkDemand)] 
 		public ItemPropertyValue[] GetItemProperties(string itemId, int[] propertyIds)
 		{
@@ -54,58 +60,34 @@ namespace ProcessControlStandarts.OPC.DataAccessClient
 			if(propertyIds.Length == 0)
 				return new ItemPropertyValue[0];
 
-			var data = new IntPtr[propertyIds.Length];
-			var dataPtr = IntPtr.Zero;
-			try
-			{
-				int[] errors;
-				itemProperties.GetItemProperties(
-					itemId, (uint)propertyIds.Length, propertyIds, out dataPtr, out errors);
+            IntPtr dataPtr, errorsPtr;
+			itemProperties.GetItemProperties(
+                itemId, (uint)propertyIds.Length, propertyIds, out dataPtr, out errorsPtr);
 
-				var results = new ItemPropertyValue[propertyIds.Length];
-
-				var dataPtrAsLong = dataPtr.ToInt64();
-				for(var i = 0; i < propertyIds.Length; i++)
-				{
-					data[i] = new IntPtr(dataPtrAsLong + i * NativeMethods.VariantSize);
-
-					results[i].Value = Marshal.GetObjectForNativeVariant(data[i]);
-					results[i].Error = errors[i];
-				}
-
-				return results;
-			}
-			finally
-			{
-				foreach (var ptr in data)
-					if(ptr != IntPtr.Zero)
-						NativeMethods.VariantClear(ptr);
-				if(dataPtr != IntPtr.Zero)
-					Marshal.FreeCoTaskMem(dataPtr);
-			}
+			return ItemPropertyResultReader.ReadItemPropertyValues(
+			    propertyIds.Length, dataPtr, errorsPtr);
 		}
 
-		public ItemPropertyId[] LookupItemIds(string itemId, int[] propertyIds)
+        /// <summary>
+        /// Retrieves item property names.
+        /// </summary>
+        /// <param name="itemId">Name of item.</param>
+        /// <param name="propertyIds">ID of properties.</param>
+        /// <returns></returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
+        public ItemPropertyId[] LookupItemIds(string itemId, int[] propertyIds)
 		{
 			itemId.ArgumentNotNullOrEmpty("itemId");
 			propertyIds.ArgumentNotNull("propertyIds");
 			if(propertyIds.Length == 0)
 				return new ItemPropertyId[0];
 
-			string[] newItemIds;
-			int[] errors;
-			itemProperties.LookupItemIDs(
-				itemId, (uint)propertyIds.Length, propertyIds, out newItemIds, out errors);
+            IntPtr dataPtr, errorsPtr;
+            itemProperties.LookupItemIDs(
+                itemId, (uint)propertyIds.Length, propertyIds, out dataPtr, out errorsPtr);
 
-			var results = new ItemPropertyId[propertyIds.Length];
-
-			for(var i = 0; i < propertyIds.Length; i++)
-			{
-				results[i].Id = newItemIds[i];
-				results[i].Error = errors[i];
-			}
-
-			return results;
+            return ItemPropertyResultReader.ReadItemPropertyIds(
+                propertyIds.Length, dataPtr, errorsPtr);
 		}
 
 		private readonly IOPCItemProperties itemProperties;
