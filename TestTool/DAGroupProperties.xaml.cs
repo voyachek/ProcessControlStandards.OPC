@@ -1,8 +1,8 @@
 ﻿#region using
 
-using System;
-using System.Diagnostics;
+using AutoMapper;
 
+using ProcessControlStandards.OPC.DataAccessClient;
 using ProcessControlStandards.OPC.TestTool.Models;
 
 #endregion
@@ -24,37 +24,37 @@ namespace ProcessControlStandards.OPC.TestTool
 
 			_propertyGrid.IsReadOnly = false;
 			_propertyGrid.SelectedObject = properties;
+            _acceptButton.Content = groupNode != null ? "OK" : "Create";
 
             if (groupNode != null)
-                UpdateProperties();
-			
-			Closed += OnClosed;
+            {
+                groupNode.GetPropertiesAsync((task, args) =>
+                {
+                    if (args.Result != null)
+                    {
+                        var groupProperties = (GroupProperties)args.Result;
+                        Mapper.Map(groupProperties, properties);
+                        properties.PropertiesChanged();
+                    }
+                });                
+            }
 		}
 
-		private void UpdateProperties()
-		{
-			serverNode.GetDAGroupPropertiesAsync(groupNode, (task, args) =>
-			{
-				if(args.Error != null)
-					serverNode.Owner.Context.Log.TraceData(TraceEventType.Error, 0, args.Error);
-				else
-				{
-					var groupProperties = (DataAccessClient.GroupProperties)args.Result;
-                    properties.Name = groupProperties.Name;
-                    properties.ClientId = groupProperties.ClientId;
-                    properties.ServerId = groupProperties.ServerId;
-                    properties.Active = groupProperties.Active;
-                    properties.UpdateRate = groupProperties.UpdateRate;
-                    properties.TimeBias = groupProperties.TimeBias;
-                    properties.PercentDeadband = groupProperties.PercentDeadband;
-                    _propertyGrid.Update();
-				}
-			});
-		}
-
-		private void OnClosed(object sender, EventArgs eventArgs)
-		{
-		}
+        private void OnAcceptButton(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (groupNode == null)
+            {
+                serverNode.CreateDAGroupAsync(
+                    Mapper.Map<Models.DAGroupProperties, GroupProperties>(properties),
+                    (task, args) => Close());
+            }
+            else
+            {
+                groupNode.ChangePropertiesAsync(
+                    Mapper.Map<Models.DAGroupProperties, GroupProperties>(properties),
+                    (task, args) => Close());
+            }
+        }
 
         private readonly ServerNode serverNode;
 

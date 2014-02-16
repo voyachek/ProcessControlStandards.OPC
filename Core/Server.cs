@@ -130,6 +130,7 @@ namespace ProcessControlStandards.OPC.Core
         /// Retrieves all possible locales of OPC Server.
         /// </summary>
         /// <returns>All possible locales of OPC Server.</returns>
+        [SecurityPermission(SecurityAction.LinkDemand)] 
 		public CultureInfo[] QueryAvailableLocales()
 		{
 			uint size;

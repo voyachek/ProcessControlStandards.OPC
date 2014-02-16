@@ -22,7 +22,17 @@ namespace ProcessControlStandards.OPC.DataAccessClient
                         result[i].Description = Marshal.PtrToStringUni(descriptionPtr);
                         Marshal.FreeCoTaskMem(descriptionPtr);
                     }
-                    result[i].Type = (VarEnum)Marshal.ReadInt16(typesPtr, i * sizeof(short));
+                    var type = Marshal.ReadInt16(typesPtr, i * sizeof(short));
+                    if (type > (short)VarEnum.VT_VECTOR)
+                    {
+                        result[i].Type = (VarEnum) (type & 0xFF00);
+                        result[i].SubType = (VarEnum) (type & 0x00FF);
+                    }
+                    else
+                    {
+                        result[i].Type = (VarEnum)type;
+                        result[i].SubType = VarEnum.VT_EMPTY;
+                    }
                 }
 
                 return result;

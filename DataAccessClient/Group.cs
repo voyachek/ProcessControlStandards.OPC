@@ -32,12 +32,14 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 				if (@group.ClientId != groupId)
 					return;
 
-				using (var reader = new ItemValueReader(clientIds, values, qualities, timeStamps, errors))
-				{
-					var handler = @group.dataChangeHandlers;
-					if(handler != null)
-						handler(@group, new DataChangeEventArgs(groupId, transactionId, quality, error, reader.Values));
-				}
+				var handler = @group.dataChangeHandlers;
+				if(handler != null)
+					handler(@group, new DataChangeEventArgs(
+                        groupId, 
+                        transactionId, 
+                        quality, 
+                        error,
+                        ItemValueReader.Read(clientIds, values, qualities, timeStamps, errors)));
 			}
 
 			public void OnReadComplete(int transactionId, int groupId, int quality, int error, uint count, int[] clientIds, IntPtr values, short[] qualities, long[] timeStamps, int[] errors)
@@ -45,12 +47,14 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 				if (@group.ClientId != groupId)
 					return;
 
-				using (var reader = new ItemValueReader(clientIds, values, qualities, timeStamps, errors))
-				{
-					var handler = @group.readCompleteHandlers;
-					if(handler != null)
-						handler(@group, new DataChangeEventArgs(groupId, transactionId, quality, error, reader.Values));
-				}
+				var handler = @group.readCompleteHandlers;
+				if(handler != null)
+					handler(@group, new DataChangeEventArgs(
+                        groupId, 
+                        transactionId, 
+                        quality, 
+                        error, 
+                        ItemValueReader.Read(clientIds, values, qualities, timeStamps, errors)));
 			}
 
 			public void OnWriteComplete(int transactionId, int groupId, int error, uint count, int[] clientIds, int[] errors)
@@ -326,7 +330,6 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 				IntPtr dataPtr;
                 IntPtr errorsPtr;
                 @group.ValidateItems((uint)items.Length, reader.Items, 0, out dataPtr, out errorsPtr);
-
                 return reader.Read(dataPtr, errorsPtr);
 			}				
 		}

@@ -61,7 +61,16 @@ namespace ProcessControlStandards.OPC.TestTool.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add group.
+        ///   Looks up a localized string similar to Add items....
+        /// </summary>
+        internal static string AddDAGroupItems {
+            get {
+                return ResourceManager.GetString("AddDAGroupItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add group....
         /// </summary>
         internal static string AddOPCDAGroup {
             get {
@@ -88,7 +97,7 @@ namespace ProcessControlStandards.OPC.TestTool.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Properties.
+        ///   Looks up a localized string similar to Properties....
         /// </summary>
         internal static string Properties {
             get {

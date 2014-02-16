@@ -3,8 +3,10 @@ using System.Globalization;
 
 namespace ProcessControlStandards.OPC.TestTool.Models
 {
-    public class DAGroupProperties
+    public class DAGroupProperties : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         [Category("Basic")]
         public string Name { get; set; }
 
@@ -28,5 +30,12 @@ namespace ProcessControlStandards.OPC.TestTool.Models
 
         [Category("Locale")]
         public CultureInfo Locale { get; set; }
+
+        public void PropertiesChanged()
+        {
+            var handler = PropertyChanged;
+            if (handler != null) 
+                handler(this, new PropertyChangedEventArgs(string.Empty));
+        }
     }
 }

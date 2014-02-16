@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Threading;
 
 using ProcessControlStandards.OPC.Core;
 using ProcessControlStandards.OPC.DataAccessClient;
@@ -52,32 +52,29 @@ namespace ProcessControlStandards.OPC.TestTool.Models
 			Owner.Context.IsBusy = true;
 			serverThread = new WorkerThread("Server " + Name);
 
-			serverThread.Post(new WorkerThread.Task
-			{
-				Do = (task, args) =>
-				{
-					server = new DAServer(Id);
-				},
+		    DoAsync((task, args) =>
+		    {
+		        server = new DAServer(Id);
+		    },
+            (task, args) =>
+            {
+                Owner.Context.IsBusy = false;
 
-				Completed = (task, args) =>
-				{
-					Owner.Context.IsBusy = false;
+                if (args.Error != null)
+                {
+                    Owner.Context.Log.TraceData(TraceEventType.Error, 0, args.Error);
 
-					if (args.Error != null)
-					{
-						Owner.Context.Log.TraceData(TraceEventType.Error, 0, args.Error);
+                    Disconnect();
+                }
+                else
+                {
+                    Icon = "/Images/ServerOn.png";
+                }
 
-						Disconnect();
-					}
-					else
-					{
-						Icon = "/Images/ServerOn.png";
-					}
+                CommandList.ForEach(command => command.RiseCanExecuteChanged());
+            });
 
-					CommandList.ForEach(command => command.RiseCanExecuteChanged());
-				}
-			});
-
+            /*
 		    serverThread.Post(new WorkerThread.Task
 		    {
                 Do = (task, args) =>
@@ -114,7 +111,8 @@ namespace ProcessControlStandards.OPC.TestTool.Models
                     g.Dispose();
                 },
 		    });
-		}
+             * */
+        }
 
 		public void Disconnect()
 		{
@@ -123,69 +121,100 @@ namespace ProcessControlStandards.OPC.TestTool.Models
 
 			Owner.Context.IsBusy = true;
 
-			serverThread.Post(new WorkerThread.Task
-			{
-				Do = (task, args) =>
-				{
-					if (server != null)
-					{
-						server.Dispose();
-						server = null;
-					}
-				},
+		    DoAsync((task, args) =>
+		    {
+                if (server != null)
+                {
+                    server.Dispose();
+                    server = null;
+                }
+		    },
+            (task, args) =>
+            {
+                serverThread.Dispose();
+                serverThread = null;
 
-				Completed = (task, args) =>
-				{
-					serverThread.Dispose();
-					serverThread = null;
+                Children.Clear();
 
-					Icon = "/Images/ServerOff.png";
-					Owner.Context.IsBusy = false;
-					CommandList.ForEach(command => command.RiseCanExecuteChanged());
+                Icon = "/Images/ServerOff.png";
+                Owner.Context.IsBusy = false;
+                CommandList.ForEach(command => command.RiseCanExecuteChanged());
 
-					if(args.Error != null)
-						Owner.Context.Log.TraceData(TraceEventType.Warning, 0, args.Error);
-				}
-			});
+                if (args.Error != null)
+                    Owner.Context.Log.TraceData(TraceEventType.Warning, 0, args.Error);
+            });
 		}
 
 		public bool GetActivePropertiesAsync(Action<WorkerThread.Task, RunWorkerCompletedEventArgs> completed)
 		{
-			if (serverThread == null)
-				return false;
-
-			serverThread.Post(new WorkerThread.Task
-			{
-				Do = (task, args) =>
-				{
-					args.Result = server.GetProperties();
-				},
-
-				Completed = completed,
-			});
-
-			return true;
+            return DoAsync((task, args) =>
+            {
+                args.Result = server.GetProperties();
+            },
+            completed);
 		}
 
-        public bool GetDAGroupPropertiesAsync(DAGroupNode groupNode, Action<WorkerThread.Task, RunWorkerCompletedEventArgs> completed)
+        public bool CreateDAGroupAsync(GroupProperties properties, Action<WorkerThread.Task, RunWorkerCompletedEventArgs> completed)
         {
+            return DoAsync((task, args) =>
+            {
+                args.Result = server.AddGroup(
+                    Interlocked.Increment(ref daGroupClientId),
+                    properties.Name,
+                    properties.Active,
+                    properties.UpdateRate,
+                    properties.PercentDeadband);
+            },
+            (task, args) =>
+            {
+                Children.Add(new DAGroupNode(this, (Group)args.Result));
+
+                completed(task, args);
+            });
+        }
+
+        public bool GetDAItemPropertiesAsync(string itemId, Action<WorkerThread.Task, RunWorkerCompletedEventArgs> completed)
+        {
+            return DoAsync((task, args) =>
+            {
+                var browser = server.GetItemProperties();
+                var definitions = browser.QueryAvailableProperties(itemId);
+                var values = browser.GetItemProperties(itemId, definitions.Select(x => x.Id).ToArray());
+                args.Result = new KeyValuePair<ItemProperty[], ItemPropertyValue[]>(definitions, values);
+            },
+            completed);
+        }
+
+        public bool DoAsync(Action<WorkerThread.Task, DoWorkEventArgs> action, Action<WorkerThread.Task, RunWorkerCompletedEventArgs> completed)
+	    {
             if (serverThread == null)
                 return false;
 
             serverThread.Post(new WorkerThread.Task
             {
-                Do = (task, args) =>
+                Do = action,
+                Completed = (task, args) =>
                 {
-                    args.Result = groupNode.Group.GetProperties();
-                },
-
-                Completed = completed,
+                    Owner.Context.Log.TraceData(TraceEventType.Error, 0, args.Error);
+                    if (completed != null)
+                        completed(task, args);
+                }
             });
 
-            return true;
+            return true;	        
+	    }
+
+	    public ServerAddressSpaceBrowser QueryAddressSpaceBrowser()
+	    {
+	        return server.GetAddressSpaceBrowser();
+	    }
+
+        public ItemProperties QueryPropertyBrowser()
+        {
+            return server.GetItemProperties();
         }
 
-		public override void Dispose()
+	    public override void Dispose()
 		{
 			base.Dispose();
 
@@ -195,6 +224,8 @@ namespace ProcessControlStandards.OPC.TestTool.Models
 		private DAServer server;
 
 		private WorkerThread serverThread;
+
+	    private static int daGroupClientId = 1;
 
         private static readonly List<ICommand> CommandList = new List<ICommand>
 		{

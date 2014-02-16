@@ -10,38 +10,31 @@ using ProcessControlStandards.OPC.Core;
 
 namespace ProcessControlStandards.OPC.DataAccessClient
 {
-	class ItemValueReader : IDisposable
+	class ItemValueReader
 	{
-		public ItemValueReader(int[] clientIds, IntPtr values, short[] qualities, long[] timeStamps, int[] errors)
-		{
-			this.values = values;
-            Values = new ItemValue[qualities.Length];
+        public static ItemValue[] Read(int[] clientIds, IntPtr values, short[] qualities, long[] timeStamps, int[] errors)
+	    {
+            var result = new ItemValue[qualities.Length];
 
             var position = 0;
             var valuesAsLong = values.ToInt64();
             for (var i = 0; i < clientIds.Length; i++)
             {
                 var variant = new IntPtr(valuesAsLong + position);
-				position += NativeMethods.VariantSize;
+                position += NativeMethods.VariantSize;
 
-	            Values[i] = new ItemValue
-	            {
-		            ClientId = clientIds[i],
-		            Timestamp = DateTime.FromFileTimeUtc(timeStamps[i]),
-		            Quality = qualities[i],
-		            Value = Marshal.GetObjectForNativeVariant(variant),
-		            Error = errors[i],
-	            };
-                NativeMethods.VariantClear(variant);
+                result[i] = new ItemValue
+                {
+                    ClientId = clientIds[i],
+                    Timestamp = DateTime.FromFileTimeUtc(timeStamps[i]),
+                    Quality = qualities[i],
+                    Value = Marshal.GetObjectForNativeVariant(variant),
+                    Error = errors[i],
+                };
             }
-		}
 
-		~ItemValueReader()
-		{
-			Dispose(false);
-		}
-
-		public ItemValue[] Values { get; private set; }
+            return result;
+	    }
 
 		[SecurityPermission(SecurityAction.LinkDemand)]
         public static ItemValue[] Read(int size, IntPtr dataPtr, IntPtr errorsPtr)
@@ -62,7 +55,7 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 			        position += sizeof (int);
 
 			        // FILETIME ftTimeStamp;
-			        long time = Marshal.ReadInt64(dataPtr, position);
+			        var time = Marshal.ReadInt64(dataPtr, position);
 			        result[i].Timestamp = DateTime.FromFileTimeUtc(time);
 			        position += sizeof (long);
 
@@ -93,21 +86,5 @@ namespace ProcessControlStandards.OPC.DataAccessClient
                 Marshal.FreeCoTaskMem(errorsPtr);
 	        }
         }
-
-		public void Dispose()
-		{
-			Dispose(true);
-
-			GC.SuppressFinalize(this);
-		}
-
-		protected void Dispose(bool disposing)
-		{			
-            if (values != IntPtr.Zero)
-                Marshal.FreeCoTaskMem(values);
-            values = IntPtr.Zero;
-		}
-
-		private IntPtr values;
 	}
 }

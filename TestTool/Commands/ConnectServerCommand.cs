@@ -21,7 +21,7 @@ namespace ProcessControlStandards.OPC.TestTool.Commands
 
         protected override bool CanExecute(ServerNode node)
 		{
-			return node != null && node.Connected;
+			return node != null && !node.Connected;
 		}
 	}
 }

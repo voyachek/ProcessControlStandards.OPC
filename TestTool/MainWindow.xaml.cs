@@ -4,6 +4,8 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Navigation;
 
 using ProcessControlStandards.OPC.TestTool.Commands;
 using ProcessControlStandards.OPC.TestTool.Models;
@@ -26,7 +28,7 @@ namespace ProcessControlStandards.OPC.TestTool
 			DataContext = ServersTree;
 
 			Loaded += OnLoaded;
-			Closed += OnClosed;
+            Closing += OnClosing;
 		}
 
 		public ServersTree ServersTree { get; private set; }
@@ -45,9 +47,28 @@ namespace ProcessControlStandards.OPC.TestTool
 			node.Commands.First(x => x is RefreshServersCommand).Execute(node);
 		}
 
-		private void OnClosed(object sender, EventArgs eventArgs)
+		private void OnClosing(object sender, EventArgs eventArgs)
 		{
 			ServersTree.Dispose();
 		}
+
+        private void DetailsViewLoadCompleted(object sender, NavigationEventArgs e)
+        {
+            UpdateDetailsViewDataContext(sender);
+        }
+
+	    private void DetailsViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+	    {
+	        UpdateDetailsViewDataContext(sender);
+	    }
+
+        private static void UpdateDetailsViewDataContext(object sender)
+        {
+            var frame = (Frame)sender;
+            var content = frame.Content as FrameworkElement;
+            if (content == null)
+                return;
+            content.DataContext = frame.DataContext;
+        }
 	}
 }

@@ -18,6 +18,11 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 		public VarEnum CanonicalDataType;
 
         /// <summary>
+        /// Item value data sub type (if type is array).
+        /// </summary>
+        public VarEnum CanonicalDataSubType;
+
+        /// <summary>
         /// Item security.
         /// </summary>
 		public int AccessRights;

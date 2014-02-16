@@ -44,7 +44,6 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 				// uint dwBlobSize;
 				Marshal.WriteInt32(Items, position, 0);
 				position += sizeof(int);
-
                 if(IntPtr.Size == 8)
                     position += sizeof(int);
 
@@ -52,8 +51,12 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 				Marshal.WriteIntPtr(Items, position, IntPtr.Zero);
 				position += IntPtr.Size;
 
+                var type = (short)item.RequestedDataType;
+                if (item.RequestedDataSubType != VarEnum.VT_EMPTY)
+                    type = (short)(type | (short) item.RequestedDataSubType);
+
 				// ushort vtRequestedDataType;
-                Marshal.WriteInt16(Items, position, (short)item.RequestedDataType);
+                Marshal.WriteInt16(Items, position, type);
 				position += sizeof(short);
 
 				// ushort wReserved;
@@ -89,9 +92,19 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 					result[i].ServerId = Marshal.ReadInt32(dataPtr, position);
 					position += sizeof(int);
 
-					// ushort vtCanonicalDataType;
-					result[i].CanonicalDataType = (VarEnum)Marshal.ReadInt16(dataPtr, position);
-					position += sizeof(short);
+                    // ushort vtCanonicalDataType;
+                    var type = Marshal.ReadInt16(dataPtr, position);
+                    position += sizeof(short);
+                    if (type > (short)VarEnum.VT_VECTOR)
+                    {
+                        result[i].CanonicalDataType = (VarEnum)(type & 0xFF00);
+                        result[i].CanonicalDataSubType = (VarEnum)(type & 0x00FF);
+                    }
+                    else
+                    {
+                        result[i].CanonicalDataType = (VarEnum)type;
+                        result[i].CanonicalDataSubType = VarEnum.VT_EMPTY;
+                    }
 
 					// ushort wReserved;
 					position += sizeof(short);
@@ -173,10 +186,10 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 			sizeof(int) + 
 			sizeof(int) + 
 			sizeof(int) + 
-            IntPtr.Size == 8 ? sizeof(int) : 0 +
+            (IntPtr.Size == 8 ? sizeof(int) : 0) +
 			IntPtr.Size + 
 			sizeof(short) + 
-			sizeof(short) +
-            IntPtr.Size == 8 ? sizeof(int) : 0;
+			sizeof(short) +  
+            (IntPtr.Size == 8 ? sizeof(int) : 0);
 	}
 }

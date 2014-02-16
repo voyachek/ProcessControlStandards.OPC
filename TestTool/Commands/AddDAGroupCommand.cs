@@ -17,12 +17,12 @@ namespace ProcessControlStandards.OPC.TestTool.Commands
 
         protected override void Execute(ServerNode node)
 		{
-            new GroupProperties(node, null).ShowDialog();
+            new DAGroupProperties(node, null).ShowDialog();
 		}
 
         protected override bool CanExecute(ServerNode node)
         {
-            return node != null && !node.Connected;
+            return node != null && node.Connected;
         }
     }
 }

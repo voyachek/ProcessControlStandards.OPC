@@ -23,6 +23,11 @@ namespace ProcessControlStandards.OPC.DataAccessClient
         public VarEnum RequestedDataType;
 
         /// <summary>
+        /// Requested value data sub type (if type is array).
+        /// </summary>
+        public VarEnum RequestedDataSubType;
+
+        /// <summary>
         /// Item read mode.
         /// </summary>
 		public bool Active;

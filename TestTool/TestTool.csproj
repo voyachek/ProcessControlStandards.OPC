@@ -18,7 +18,7 @@
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -37,6 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoMapper">
+      <HintPath>..\packages\AutoMapper.NET35.1.1.0.118\lib\net35\AutoMapper.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="WindowsBase" />
@@ -57,19 +60,42 @@
     <Compile Include="Commands\AddDAGroupCommand.cs" />
     <Compile Include="Commands\BoundCommand.cs" />
     <Compile Include="Commands\ConnectServerCommand.cs" />
+    <Compile Include="Commands\AddOrRemoveDAGroupItemsCommand.cs" />
+    <Compile Include="Commands\DAGroupPropertiesCommand.cs" />
     <Compile Include="Commands\DisconnectServerCommand.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\ServerPropertiesCommand.cs" />
+    <Compile Include="Converters\VarEnumConverter.cs" />
+    <Compile Include="Converters\ValueConverter.cs" />
+    <Compile Include="AddOrRemoveDAGroupItemResults.xaml.cs">
+      <DependentUpon>AddOrRemoveDAGroupItemResults.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DAGroupItemResults.xaml.cs">
+      <DependentUpon>DAGroupItemResults.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DAGroupItemProperties.xaml.cs">
+      <DependentUpon>DAGroupItemProperties.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddOrRemoveDAGroupItems.xaml.cs">
+      <DependentUpon>AddOrRemoveDAGroupItems.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DAGroupItems.xaml.cs">
+      <DependentUpon>DAGroupItems.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DAGroupProperties.xaml.cs">
       <DependentUpon>DAGroupProperties.xaml</DependentUpon>
     </Compile>
     <Compile Include="IRunContext.cs" />
     <Compile Include="Commands\Command.cs" />
+    <Compile Include="Models\DAGroupItem.cs" />
+    <Compile Include="Models\DAGroupItemNode.cs" />
+    <Compile Include="Models\DAGroupItemProperty.cs" />
     <Compile Include="Models\DAGroupProperties.cs" />
     <Compile Include="Models\DAGroupNode.cs" />
     <Compile Include="Models\LocalHostNode.cs" />
     <Compile Include="Models\Node.cs" />
     <Compile Include="Commands\RefreshServersCommand.cs" />
+    <Compile Include="Models\NodeDetailsView.cs" />
     <Compile Include="Models\ServerNode.cs" />
     <Compile Include="Models\ServerProperties.cs" />
     <Compile Include="Models\ServersTree.cs" />
@@ -77,6 +103,26 @@
       <DependentUpon>ServerProperties.xaml</DependentUpon>
     </Compile>
     <Compile Include="WorkerThread.cs" />
+    <Page Include="AddOrRemoveDAGroupItemResults.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DAGroupItemResults.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DAGroupItemProperties.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddOrRemoveDAGroupItems.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DAGroupItems.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DAGroupProperties.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -142,6 +188,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\ServerOff.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\DAGroup.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

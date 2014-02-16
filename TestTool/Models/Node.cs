@@ -11,18 +11,21 @@ namespace ProcessControlStandards.OPC.TestTool.Models
 		public Node()
 		{
 			Children = new ObservableCollection<Node>();
+            DetailsView = new NodeDetailsView();
 		}
 
 		public bool IsExpanded { get; set; }
 
 		public bool IsSelected { get; set; }
 
-		public string Name { get; set; }
+		public string Name { get; protected set; }
 
-		public string Icon
+        public NodeDetailsView DetailsView { get; protected set; }
+
+	    public string Icon
 		{
 			get { return icon; }
-			set
+			protected set
 			{
 				icon = value;
 				NotifyPropertyChanged("Icon");

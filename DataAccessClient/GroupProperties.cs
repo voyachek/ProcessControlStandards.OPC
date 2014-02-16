@@ -9,7 +9,7 @@ namespace ProcessControlStandards.OPC.DataAccessClient
     /// <summary>
     /// OPC DA group properties.
     /// </summary>
-	public class GroupProperties
+	public class GroupProperties 
 	{
         /// <summary>
         /// OPC DA group client ID.

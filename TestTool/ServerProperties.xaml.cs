@@ -1,7 +1,6 @@
 ﻿#region using
 
 using System;
-using System.Diagnostics;
 using System.Windows.Threading;
 
 using ProcessControlStandards.OPC.TestTool.Models;
@@ -10,9 +9,6 @@ using ProcessControlStandards.OPC.TestTool.Models;
 
 namespace ProcessControlStandards.OPC.TestTool
 {
-	/// <summary>
-	/// Interaction logic for ServerProperties.xaml
-	/// </summary>
 	public partial class ServerProperties
 	{
 		public ServerProperties(ServerNode node)
@@ -38,12 +34,9 @@ namespace ProcessControlStandards.OPC.TestTool
 		{
 			node.GetActivePropertiesAsync((task, args) =>
 			{
-				if(args.Error != null)
-					node.Owner.Context.Log.TraceData(TraceEventType.Error, 0, args.Error);
-				else
+				if(args.Result != null)
 				{
-					var serverProperties =
-						(DataAccessClient.ServerProperties)args.Result;
+					var serverProperties = (DataAccessClient.ServerProperties)args.Result;
 					properties.StartTime = serverProperties.StartTime;
 					properties.CurrentTime = serverProperties.CurrentTime;
 					properties.LastUpdateTime = serverProperties.LastUpdateTime;

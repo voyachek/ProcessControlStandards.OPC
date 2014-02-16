@@ -25,5 +25,10 @@ namespace ProcessControlStandards.OPC.DataAccessClient
         /// Property data type.
         /// </summary>
 		public VarEnum Type;
+
+        /// <summary>
+        /// Property item data type (if type is array).
+        /// </summary>
+        public VarEnum SubType;
 	}
 }
