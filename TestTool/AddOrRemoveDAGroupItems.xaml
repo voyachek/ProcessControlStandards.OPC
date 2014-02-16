@@ -1,0 +1,44 @@
+﻿<Window x:Class="ProcessControlStandards.OPC.TestTool.AddOrRemoveDAGroupItems"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:ProcessControlStandards.OPC.TestTool.Models"
+        mc:Ignorable="d"       
+        Title="Add or remove DA group items" Height="600" Width="500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+        <ListView x:Name="_itemList" Grid.Row="0" d:DataContext="{d:DesignInstance models:DAGroupItem }">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Selected, Mode=TwoWay}"></CheckBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"></GridViewColumn>
+                    <GridViewColumn Header="Properties">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Hyperlink Tag="{Binding Name}" NavigateUri="{Binding Name}" RequestNavigate="ShowProperties">
+                                        <TextBlock Text="Show properties" />
+                                    </Hyperlink> 
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button Click="OnAcceptButton" Margin="5" Padding="5">Set selected</Button>
+            <Button Click="OnValidateButton" Margin="5" Padding="5">Validate selected</Button>
+        </StackPanel>
+    </Grid>
+</Window>

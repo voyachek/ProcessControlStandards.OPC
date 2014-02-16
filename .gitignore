@@ -30,3 +30,4 @@ $tf*/
 PrevCode*/
 *.DotSettings
 packages*/
+!NuGet.exe

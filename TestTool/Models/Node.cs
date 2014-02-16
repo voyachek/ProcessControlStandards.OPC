@@ -18,9 +18,17 @@ namespace ProcessControlStandards.OPC.TestTool.Models
 
 		public bool IsSelected { get; set; }
 
-		public string Name { get; protected set; }
+	    public string Name
+	    {
+	        get { return name; }
+	        protected set
+	        {
+	            name = value;
+                NotifyPropertyChanged("Name");
+	        }
+	    }
 
-        public NodeDetailsView DetailsView { get; protected set; }
+	    public NodeDetailsView DetailsView { get; protected set; }
 
 	    public string Icon
 		{
@@ -49,5 +57,7 @@ namespace ProcessControlStandards.OPC.TestTool.Models
 		}
 
 		private string icon;
+
+	    private string name;
 	}
 }

@@ -11,7 +11,8 @@ namespace ProcessControlStandards.OPC.TestTool
 	{
 	    public App()
 	    {
-	        Mapper.CreateMap<DAGroupProperties, GroupProperties>();
+	        Mapper.CreateMap<Models.DAGroupProperties, GroupProperties>();
+            Mapper.CreateMap<GroupProperties, Models.DAGroupProperties>();
 	    }
 	}
 }

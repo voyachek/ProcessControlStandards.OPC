@@ -1,0 +1,22 @@
+﻿<Window x:Class="ProcessControlStandards.OPC.TestTool.DAGroupItemProperties"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:ProcessControlStandards.OPC.TestTool.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:ProcessControlStandards.OPC.TestTool.Models"
+        mc:Ignorable="d"
+        Title="Item properties" Height="500" Width="500">
+    <ListView x:Name="_itemPropertiesList" d:DataContext="{d:DesignInstance models:DAGroupItemProperty }">
+        <ListView.View>
+            <GridView>
+                <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}"/>
+                <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Description}"/>
+                <GridViewColumn Header="Type" DisplayMemberBinding="{Binding Type}"/>
+                <GridViewColumn Header="SubType" DisplayMemberBinding="{Binding SubType, Converter={converters:VarEnumConverter}}"/>
+                <GridViewColumn Header="Value" DisplayMemberBinding="{Binding Value, Converter={converters:ValueConverter}}"/>
+                <GridViewColumn Header="Error" DisplayMemberBinding="{Binding Error}"/>
+            </GridView>
+        </ListView.View>
+    </ListView>
+</Window>

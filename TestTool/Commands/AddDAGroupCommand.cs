@@ -1,6 +1,5 @@
 ﻿#region Using
 
-using ProcessControlStandards.OPC.DataAccessClient;
 using ProcessControlStandards.OPC.TestTool.Models;
 using ProcessControlStandards.OPC.TestTool.Properties;
 

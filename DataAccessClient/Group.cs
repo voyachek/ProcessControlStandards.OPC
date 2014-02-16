@@ -283,7 +283,7 @@ namespace ProcessControlStandards.OPC.DataAccessClient
 			ClientId = properties.ClientId;
 			UpdateRate = revisedUpdateRate;
 
-			if(string.Equals(properties.Name, Name))
+			if(!string.Equals(properties.Name, Name))
 				groupManagement.SetName(properties.Name);
 			Name = properties.Name;
 		}
