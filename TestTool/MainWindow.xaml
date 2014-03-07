@@ -29,7 +29,7 @@
 									<ContextMenu.ItemContainerStyle>
 										<Style TargetType="{x:Type MenuItem}" >
 											<Setter Property="Command" Value="{Binding}"/>
-                                            <Setter Property="Header" Value="{Binding Name, Mode=TwoWay}"/>
+                                            <Setter Property="Header" Value="{Binding Name}"/>
 											<Setter Property="commands:BoundCommand.Parameter" Value="{Binding Path=DataContext, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}"/>
 										</Style>
 									</ContextMenu.ItemContainerStyle>
